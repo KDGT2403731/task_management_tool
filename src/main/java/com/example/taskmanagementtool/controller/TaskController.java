@@ -63,31 +63,6 @@ public class TaskController {
 		return "task/detail";
 	}
 
-	@PostMapping("/{taskId}/edit")
-	public String updateTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
-			@RequestParam("title") String title,
-			@RequestParam(value = "description", required = false) String description,
-			@RequestParam(value = "priority", required = false) String priority,
-			@RequestParam(value = "assigneeId", required = false) Long assigneeId,
-			@RequestParam(value = "startDate", required = false)
-			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-			@RequestParam(value = "dueDate", required = false)
-			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDate,
-			@RequestParam(value = "planHours", required = false) Integer planHours,
-			@RequestParam(value = "actualHours", required = false) Integer actualHours) {
-
-		taskService.updateTask(projectId, taskId, title, description, priority, assigneeId, startDate, dueDate,
-				planHours, actualHours);
-
-		return "redirect:/projects/" + projectId + "/tasks/" + taskId;
-	}
-
-	@PostMapping("/{taskId}/delete")
-	public String deleteTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId) {
-		taskService.deleteTask(projectId, taskId);
-		return "redirect:/projects/" + projectId + "/tasks";
-	}
-
 	@GetMapping("/create")
 	public String createTaskForm(@PathVariable("projectId") Long projectId, Model model) {
 		model.addAttribute("projectId", projectId);
@@ -111,6 +86,31 @@ public class TaskController {
 		taskService.createTask(projectId, userDetails.getUsername(), title, description, priority, assigneeId,
 				startDate, dueDate, planHours);
 
+		return "redirect:/projects/" + projectId + "/tasks";
+	}
+
+	@PostMapping("/{taskId}/edit")
+	public String updateTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
+			@RequestParam("title") String title,
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "priority", required = false) String priority,
+			@RequestParam(value = "assigneeId", required = false) Long assigneeId,
+			@RequestParam(value = "startDate", required = false)
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+			@RequestParam(value = "dueDate", required = false)
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDate,
+			@RequestParam(value = "planHours", required = false) Integer planHours,
+			@RequestParam(value = "actualHours", required = false) Integer actualHours) {
+
+		taskService.updateTask(projectId, taskId, title, description, priority, assigneeId, startDate, dueDate,
+				planHours, actualHours);
+
+		return "redirect:/projects/" + projectId + "/tasks/" + taskId;
+	}
+
+	@PostMapping("/{taskId}/delete")
+	public String deleteTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId) {
+		taskService.deleteTask(projectId, taskId);
 		return "redirect:/projects/" + projectId + "/tasks";
 	}
 

@@ -45,7 +45,9 @@
 
 			<section class="task-meta">
 				<div class="meta-item"><strong>ステータス:</strong>
-					<span th:text="${task.status}">未設定</span>
+					<span class="status-badge"
+						th:text="${task.status}"
+						th:classappend="${task.status == 'TODO'} ? ' badge-todo' : (${task.status == 'IN_PROGRESS'} ) ? ' badge-inprogress' : (${task.status == 'DONE'}) ? ' badge-done' : ''">未設定</span>
 				</div>
 				<div class="meta-item"><strong>優先度:</strong>
 					<span th:text="${task.priority}">中</span>
@@ -60,13 +62,16 @@
 
 			<section class="task-description">
 				<h2>説明</h2>
-				<pre th:text="${task.description}">タスクの詳細説明がここに入ります。</pre>
+				<div class="description-text" th:text="${task.description}">タスクの詳細説明がここに入ります。</div>
 			</section>
 
 			<section class="task-tags" th:if="${task.tags != null}">
 				<h3>タグ</h3>
 				<div class="tags">
-					<span class="tag" th:each="tag : ${task.tags}" th:text="${tag.name}">タグ名</span>
+					<!-- タグをクリックするとプロジェクト内タスク一覧をタグでフィルタする想定 -->
+					<a class="tag" th:each="tag : ${task.tags}"
+						th:href="@{/projects/{id}/tasks(id=${projectId},tag=${tag.id})}"
+						th:text="${tag.name}">タグ名</a>
 				</div>
 			</section>
 
@@ -74,15 +79,22 @@
 				<h3>コメント</h3>
 				<div class="comments-list" th:if="${task.comments != null and #lists.isNotEmpty(task.comments)}">
 					<div class="comment" th:each="c : ${task.comments}">
-						<div class="comment-meta">
-							<strong th:text="${c.author != null ? c.author.name : '名無し'}">名無し</strong>
-							<span class="comment-date"
-								th:text="${#dates.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+						<!-- avatar + meta + body -->
+						<div>
+							<img class="avatar" th:src="${c.author != null && c.author.avatarUrl != null} ? ${c.author.avatarUrl} : '/img/avatar-placeholder.png'"
+								alt="avatar" />
 						</div>
-						<div class="comment-body" th:text="${c.content}">コメント本文</div>
+						<div>
+							<div class="comment-meta">
+								<strong th:text="${c.author != null ? c.author.name : '名無し'}">名無し</strong>
+								<span class="comment-date"
+									th:text="${#dates.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+							</div>
+							<div class="comment-body" th:text="${c.content}">コメント本文</div>
+						</div>
 					</div>
 				</div>
-				<div th:if="${task.comments == null or #lists.isEmpty(task.comments)}">コメントはまだありません。</div>
+				<div th:if="${task.comments == null or #lists.isEmpty(task.comments)}">コメントはまだありません。最初のコメントを残しましょう。</div>
 
 				<form
 					th:action="@{/projects/{projectId}/tasks/{taskId}/comments(projectId=${projectId},taskId=${task.id})}"

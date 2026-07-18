@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${project.name} + ' | 工程ノート'">プロジェクト詳細 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/projects" class="btn btn-ghost">プロジェクト一覧</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="banner banner-error" th:if="${deleteError}">
+				<span th:text="${deleteError}"></span>
+			</div>
+
+			<div class="detail-head">
+				<div>
+					<p class="eyebrow">Project</p>
+					<h1 th:text="${project.name}">プロジェクト名</h1>
+				</div>
+				<div class="detail-actions">
+					<a th:href="@{/projects/{id}/edit(id=${projectId})}" class="btn btn-ghost">編集</a>
+					<form th:action="@{/projects/{id}/delete(id=${projectId})}" method="post"
+						onsubmit="return confirm('このプロジェクトを削除しますか？関連するタスク・マイルストーンもすべて削除されます。');">
+						<button type="submit" class="btn btn-danger">削除</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="detail-meta">
+				<div class="meta-item">
+					<span class="meta-label">Status</span>
+					<span th:class="${'status-badge ' +
+						(project.status == 'IN_PROGRESS' ? 'status-in-progress' :
+						(project.status == 'COMPLETED' ? 'status-completed' : 'status-not-started'))}"
+						th:text="${project.status}">NOT_STARTED</span>
+				</div>
+				<div class="meta-item" th:if="${project.team != null}">
+					<span class="meta-label">Team</span>
+					<span th:text="${project.team.name}">チーム名</span>
+				</div>
+				<div class="meta-item" th:if="${project.owner != null}">
+					<span class="meta-label">Owner</span>
+					<span th:text="${project.owner.name}">オーナー名</span>
+				</div>
+				<div class="meta-item">
+					<span class="meta-label">Period</span>
+					<span>
+						<span th:if="${project.startDate != null}"
+							th:text="${#temporals.format(project.startDate, 'yyyy/MM/dd')}">2026/01/01</span>
+						<span th:unless="${project.startDate != null}">未設定</span>
+						〜
+						<span th:if="${project.endDate != null}"
+							th:text="${#temporals.format(project.endDate, 'yyyy/MM/dd')}">2026/03/31</span>
+						<span th:unless="${project.endDate != null}">未定</span>
+					</span>
+				</div>
+			</div>
+
+			<p class="detail-description" th:if="${project.description != null and !project.description.isEmpty()}"
+				th:text="${project.description}">プロジェクトの説明文がここに入ります。</p>
+
+			<div class="nav-card-grid">
+				<a class="nav-card" th:href="@{/projects/{id}/tasks(id=${projectId})}">
+					<p class="nav-card-title">タスク一覧</p>
+					<p class="nav-card-desc">カンバン形式でタスクを管理</p>
+				</a>
+				<a class="nav-card" th:href="@{/projects/{id}/tasks/gantt(id=${projectId})}">
+					<p class="nav-card-title">ガントチャート</p>
+					<p class="nav-card-desc">スケジュールと依存関係を可視化</p>
+				</a>
+				<a class="nav-card" th:href="@{/projects/{id}/milestones(id=${projectId})}">
+					<p class="nav-card-title">マイルストーン</p>
+					<p class="nav-card-desc">目標地点の設定と進捗確認</p>
+				</a>
+				<a class="nav-card" th:href="@{/projects/{id}/reports(id=${projectId})}">
+					<p class="nav-card-title">分析レポート</p>
+					<p class="nav-card-desc">メンバー別の工数集計</p>
+				</a>
+				<a class="nav-card" th:href="@{/projects/{id}/tasks/recurring(id=${projectId})}">
+					<p class="nav-card-title">繰り返し設定</p>
+					<p class="nav-card-desc">定例タスクの自動生成ルール</p>
+				</a>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+			<nav class="foot-links">
+				<a href="/dashboard">ダッシュボード</a>
+				<a href="/projects">プロジェクト</a>
+			</nav>
+		</div>
+	</footer>
+
+</body>
+
+</html>

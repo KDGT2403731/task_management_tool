@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "app.encryption.secret-key",
+  "type": "java.lang.String",
+  "description": "TokenEncryptionServiceがIntegrationのaccessToken/refreshTokenを暗号化・復号する際に使用するAES鍵（Base64エンコードされた32バイト鍵）。"
+}]}

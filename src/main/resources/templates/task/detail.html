@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${task.title} + ' | 工程ノート'">タスク詳細 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet"
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+	<main class="container page-main">
+		<div class="task-detail">
+			<div class="task-header">
+				<h1 th:text="${task.title}">タスクタイトル</h1>
+				<div class="task-actions">
+					<a th:href="@{/projects/{projectId}/tasks/{taskId}/edit(projectId=${projectId},taskId=${task.id})}"
+						class="btn">編集</a>
+					<form
+						th:action="@{/projects/{projectId}/tasks/{taskId}/delete(projectId=${projectId},taskId=${task.id})}"
+						method="post" onsubmit="return confirm('このタスクを削除してもよいですか？');" style="display:inline">
+						<input type="hidden" name="_method" value="delete" />
+						<button type="submit" class="btn btn-danger">削除</button>
+					</form>
+				</div>
+			</div>
+
+			<section class="task-meta">
+				<div class="meta-item"><strong>ステータス:</strong>
+					<span th:text="${task.status}">未設定</span>
+				</div>
+				<div class="meta-item"><strong>優先度:</strong>
+					<span th:text="${task.priority}">中</span>
+				</div>
+				<div class="meta-item"><strong>担当者:</strong>
+					<span th:text="${task.assignee != null ? task.assignee.name : '未割当'}">未割当</span>
+				</div>
+				<div class="meta-item"><strong>期限:</strong>
+					<span th:text="${task.dueDate != null ? #dates.format(task.dueDate,'yyyy-MM-dd') : 'なし'}">なし</span>
+				</div>
+			</section>
+
+			<section class="task-description">
+				<h2>説明</h2>
+				<pre th:text="${task.description}">タスクの詳細説明がここに入ります。</pre>
+			</section>
+
+			<section class="task-tags" th:if="${task.tags != null}">
+				<h3>タグ</h3>
+				<div class="tags">
+					<span class="tag" th:each="tag : ${task.tags}" th:text="${tag.name}">タグ名</span>
+				</div>
+			</section>
+
+			<section class="task-comments">
+				<h3>コメント</h3>
+				<div class="comments-list" th:if="${task.comments != null and #lists.isNotEmpty(task.comments)}">
+					<div class="comment" th:each="c : ${task.comments}">
+						<div class="comment-meta">
+							<strong th:text="${c.author != null ? c.author.name : '名無し'}">名無し</strong>
+							<span class="comment-date"
+								th:text="${#dates.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
+						</div>
+						<div class="comment-body" th:text="${c.content}">コメント本文</div>
+					</div>
+				</div>
+				<div th:if="${task.comments == null or #lists.isEmpty(task.comments)}">コメントはまだありません。</div>
+
+				<form
+					th:action="@{/projects/{projectId}/tasks/{taskId}/comments(projectId=${projectId},taskId=${task.id})}"
+					method="post" class="comment-form">
+					<label for="comment">コメントを追加</label>
+					<textarea id="comment" name="content" rows="4" required></textarea>
+					<button type="submit" class="btn">投稿</button>
+				</form>
+			</section>
+
+			<nav class="task-footer">
+				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
+			</nav>
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<small>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span> Kotei</small>
+		</div>
+	</footer>
+
+</body>
+
+</html>

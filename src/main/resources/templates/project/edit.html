@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>プロジェクトを編集 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/projects" class="btn btn-ghost">プロジェクト</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-header">
+				<div>
+					<p class="eyebrow">Edit project</p>
+					<h1 th:text="${project.name}">プロジェクト名</h1>
+				</div>
+			</div>
+
+			<div class="form-card">
+				<form th:action="@{/projects/{id}/edit(id=${project.id})}" method="post">
+					<div class="form-field">
+						<label for="name">プロジェクト名</label>
+						<input type="text" id="name" name="name" th:value="${project.name}" required autofocus>
+					</div>
+					<div class="form-field">
+						<label for="description">説明</label>
+						<textarea id="description" name="description" th:text="${project.description}"></textarea>
+					</div>
+					<div class="form-row">
+						<div class="form-field">
+							<label for="startDate">開始日</label>
+							<input type="date" id="startDate" name="startDate" th:value="${project.startDate}">
+						</div>
+						<div class="form-field">
+							<label for="endDate">終了予定日</label>
+							<input type="date" id="endDate" name="endDate" th:value="${project.endDate}">
+						</div>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">保存する</button>
+						<a th:href="@{/projects/{id}(id=${project.id})}" class="btn btn-ghost">キャンセル</a>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+			<nav class="foot-links">
+				<a href="/dashboard">ダッシュボード</a>
+				<a href="/projects">プロジェクト</a>
+			</nav>
+		</div>
+	</footer>
+
+</body>
+
+</html>

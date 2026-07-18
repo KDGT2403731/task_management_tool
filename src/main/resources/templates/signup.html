@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>新規登録 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/login" class="btn btn-ghost">ログイン</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<section class="auth-section">
+			<div class="container">
+				<div class="auth-card">
+					<h1>はじめましょう</h1>
+					<p class="auth-lead">数十秒で登録できます。</p>
+
+					<div class="banner banner-error" th:if="${signupError}">
+						<span th:text="${signupError}"></span>
+					</div>
+
+					<form th:action="@{/signup}" th:object="${signup}" method="post">
+						<div class="form-field">
+							<label for="name">お名前</label>
+							<input type="text" id="name" th:field="*{name}" required autofocus autocomplete="name">
+						</div>
+						<div class="form-field">
+							<label for="email">メールアドレス</label>
+							<input type="email" id="email" th:field="*{email}" required autocomplete="email">
+						</div>
+						<div class="form-field">
+							<label for="password">パスワード</label>
+							<input type="password" id="password" th:field="*{password}" required
+								autocomplete="new-password" minlength="8">
+						</div>
+						<div class="form-field">
+							<label for="role">利用区分</label>
+							<select id="role" th:field="*{role}" required>
+								<option value="MEMBER">一般メンバー（プロジェクトを作成・管理する）</option>
+								<option value="GUEST">ゲスト（タスクとガントチャートを閲覧のみ）</option>
+							</select>
+						</div>
+						<button type="submit" class="btn btn-primary">登録する</button>
+					</form>
+
+					<p class="auth-switch">
+						すでにアカウントをお持ちの方は <a href="/login">ログイン</a>
+					</p>
+				</div>
+			</div>
+		</section>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+			<nav class="foot-links">
+				<a href="/login">ログイン</a>
+				<a href="/signup">新規登録</a>
+			</nav>
+		</div>
+	</footer>
+
+</body>
+
+</html>

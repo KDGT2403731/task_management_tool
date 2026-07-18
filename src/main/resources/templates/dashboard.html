@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ダッシュボード | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/projects" class="btn btn-ghost">プロジェクト</a>
+				<a href="/settings/integration" class="btn btn-ghost">設定</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="dashboard-hero">
+				<div>
+					<p class="eyebrow">Dashboard</p>
+					<h1>
+						<span th:if="${username}">ようこそ、<span th:text="${username}"></span>さん</span>
+						<span th:unless="${username}">おかえりなさい</span>
+					</h1>
+				</div>
+				<div class="quick-actions">
+					<a href="/projects/create" class="btn btn-primary">新しいプロジェクト</a>
+					<a href="/projects" class="btn btn-ghost">プロジェクト一覧</a>
+				</div>
+			</div>
+
+			<div class="dashboard-grid">
+				<section class="panel">
+					<div class="panel-head">
+						<h2>今後のマイルストーン</h2>
+					</div>
+
+					<ul class="milestone-list"
+						th:if="${upcomingMilestones != null and !#lists.isEmpty(upcomingMilestones)}">
+						<li class="milestone-item" th:each="milestone : ${upcomingMilestones}">
+							<div class="milestone-main">
+								<p class="milestone-title" th:text="${milestone.title}">マイルストーン名</p>
+								<p class="milestone-meta">
+									<a th:if="${milestone.project != null}"
+										th:href="@{/projects/{id}(id=${milestone.project.id})}"
+										th:text="${milestone.project.name}">プロジェクト名</a>
+									<span
+										th:class="${'status-badge ' + (milestone.status == 'ACHIEVED' ? 'status-achieved' : (milestone.status == 'MISSED' ? 'status-missed' : 'status-open'))}"
+										th:text="${milestone.status}">OPEN</span>
+								</p>
+							</div>
+							<span class="milestone-date" th:if="${milestone.targetDate != null}"
+								th:text="${#temporals.format(milestone.targetDate, 'yyyy/MM/dd')}">2026/01/01</span>
+						</li>
+					</ul>
+
+					<div class="empty-state"
+						th:if="${upcomingMilestones == null or #lists.isEmpty(upcomingMilestones)}">
+						<p>直近のマイルストーンはまだありません。</p>
+						<a href="/projects" class="btn btn-ghost">プロジェクトからマイルストーンを設定</a>
+					</div>
+				</section>
+
+				<aside class="panel">
+					<div class="panel-head">
+						<h2>ショートカット</h2>
+					</div>
+					<ul class="side-links">
+						<li><a href="/projects">プロジェクト一覧</a></li>
+						<li><a href="/projects/create">新しいプロジェクト</a></li>
+						<li><a href="/settings/integration">外部連携設定</a></li>
+					</ul>
+				</aside>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+			<nav class="foot-links">
+				<a href="/projects">プロジェクト</a>
+				<a href="/settings/integration">設定</a>
+			</nav>
+		</div>
+	</footer>
+
+</body>
+
+</html>

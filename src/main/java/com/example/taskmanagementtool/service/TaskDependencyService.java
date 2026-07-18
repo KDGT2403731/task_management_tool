@@ -58,9 +58,6 @@ public class TaskDependencyService {
 		return taskDependencyRepository.findBySucceedingTaskId(taskId);
 	}
 
-	/**
-	 * 指定したタスクに依存している後続タスク一覧を取得する。
-	 */
 	@Transactional(readOnly = true)
 	public List<TaskDependency> getSucceedingDependencies(Long taskId) {
 		return taskDependencyRepository.findByPrecedingTaskId(taskId);

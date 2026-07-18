@@ -1,6 +1,5 @@
 package com.example.taskmanagementtool.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +12,14 @@ import com.example.taskmanagementtool.service.ReportService;
 @Controller
 @RequestMapping("/projects/{projectId}/reports")
 public class ReportController {
-	@Autowired
-	private ReportService reportService;
+	private final ReportService reportService;
 
-	@Autowired
-	private ProjectService projectService;
+	private final ProjectService projectService;
+
+	public ReportController(ReportService reportService, ProjectService projectService) {
+		this.reportService = reportService;
+		this.projectService = projectService;
+	}
 
 	@GetMapping
 	public String report(@PathVariable("projectId") Long projectId, Model model) {

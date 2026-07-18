@@ -1,6 +1,5 @@
 package com.example.taskmanagementtool.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -13,8 +12,12 @@ import com.example.taskmanagementtool.service.TaskService;
 @Controller
 @RequestMapping("/guest")
 public class GuestController {
-	@Autowired
-	private TaskService taskService;
+
+	private final TaskService taskService;
+
+	public GuestController(TaskService taskService) {
+		this.taskService = taskService;
+	}
 
 	@GetMapping("/tasks")
 	public String listTasks(@AuthenticationPrincipal UserDetails userDetails, Model model) {

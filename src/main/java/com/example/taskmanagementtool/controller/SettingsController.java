@@ -2,7 +2,6 @@ package com.example.taskmanagementtool.controller;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,8 +19,12 @@ import com.example.taskmanagementtool.service.IntegrationService;
 @Controller
 @RequestMapping("/settings/integration")
 public class SettingsController {
-	@Autowired
-	private IntegrationService integrationService;
+
+	private final IntegrationService integrationService;
+
+	public SettingsController(IntegrationService integrationService) {
+		this.integrationService = integrationService;
+	}
 
 	@GetMapping
 	public String integrationSetting(@AuthenticationPrincipal UserDetails userDetails, Model model) {

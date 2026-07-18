@@ -1,6 +1,5 @@
 package com.example.taskmanagementtool.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -19,11 +18,13 @@ import com.example.taskmanagementtool.service.UserService;
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
-	@Autowired
-	private UserService userService;
+	private final UserService userService;
+	private final TeamService teamService;
 
-	@Autowired
-	private TeamService teamService;
+	public AdminController(UserService userService, TeamService teamService) {
+		this.userService = userService;
+		this.teamService = teamService;
+	}
 
 	// ========== UC01: ユーザー管理 ==========
 

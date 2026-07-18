@@ -2,7 +2,6 @@ package com.example.taskmanagementtool.controller;
 
 import java.time.LocalDate;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,14 +22,16 @@ import com.example.taskmanagementtool.service.TaskService;
 @Controller
 @RequestMapping("/projects/{projectId}/tasks")
 public class TaskController {
-	@Autowired
-	private TaskService taskService;
+	private final TaskService taskService;
+	private final TaskDependencyService taskDependencyService;
+	private final RecurringRuleService recurringRuleService;
 
-	@Autowired
-	private TaskDependencyService taskDependencyService;
-
-	@Autowired
-	private RecurringRuleService recurringRuleService;
+	public TaskController(TaskService taskService, TaskDependencyService taskDependencyService,
+			RecurringRuleService recurringRuleService) {
+		this.taskService = taskService;
+		this.taskDependencyService = taskDependencyService;
+		this.recurringRuleService = recurringRuleService;
+	}
 
 	@GetMapping
 	public String listTasks(@PathVariable("projectId") Long projectId, Model model) {

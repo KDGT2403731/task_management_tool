@@ -3,7 +3,6 @@ package com.example.taskmanagementtool.controller;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,11 +23,13 @@ import com.example.taskmanagementtool.service.ProjectService;
 @Controller
 @RequestMapping("/projects")
 public class ProjectController {
-	@Autowired
-	private ProjectService projectService;
+	private final ProjectService projectService;
+	private final MilestoneService milestoneService;
 
-	@Autowired
-	private MilestoneService milestoneService;
+	public ProjectController(ProjectService projectService, MilestoneService milestoneService) {
+		this.projectService = projectService;
+		this.milestoneService = milestoneService;
+	}
 
 	// ========== プロジェクト ==========
 

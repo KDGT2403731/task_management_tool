@@ -57,7 +57,8 @@ public class TaskController {
 		model.addAttribute("task", taskService.getTaskInProject(projectId, taskId));
 		model.addAttribute("assignableUsers", taskService.listAssignableUsers(projectId));
 		model.addAttribute("otherTasks", taskService.listOtherTasksInProject(projectId, taskId));
-		model.addAttribute("dependencies", taskDependencyService.getDependenciesByProject(projectId));
+		model.addAttribute("precedingDependencies", taskDependencyService.getPrecedingDependencies(taskId));
+		model.addAttribute("succeedingDependencies", taskDependencyService.getSucceedingDependencies(taskId));
 		model.addAttribute("frequencies", RecurringRuleService.VALID_FREQUENCIES);
 		return "task/detail";
 	}

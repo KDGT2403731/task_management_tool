@@ -10,6 +10,7 @@ import com.example.taskmanagementtool.entity.Project;
 import com.example.taskmanagementtool.entity.Task;
 import com.example.taskmanagementtool.entity.User;
 import com.example.taskmanagementtool.repository.ProjectRepository;
+import com.example.taskmanagementtool.repository.TaskDependencyRepository;
 import com.example.taskmanagementtool.repository.TaskRepository;
 import com.example.taskmanagementtool.repository.UserRepository;
 
@@ -20,12 +21,14 @@ public class TaskService {
 	private final TaskRepository taskRepository;
 	private final ProjectRepository projectRepository;
 	private final UserRepository userRepository;
+	private final TaskDependencyRepository taskDependencyRepository;
 
 	public TaskService(TaskRepository taskRepository, ProjectRepository projectRepository,
-			UserRepository userRepository) {
+			UserRepository userRepository, TaskDependencyRepository taskDependencyRepository) {
 		this.taskRepository = taskRepository;
 		this.projectRepository = projectRepository;
 		this.userRepository = userRepository;
+		this.taskDependencyRepository = taskDependencyRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -150,6 +153,16 @@ public class TaskService {
 	@Transactional
 	public void deleteTask(Long projectId, Long taskId) {
 		Task task = findTaskInProject(projectId, taskId);
+
+		// TaskはTaskDependencyへのマッピングを持たないため、依存関係が残っていると
+		// 外部キー制約違反になる。先に前提/後続どちらにも使われていないか確認する。
+		int asPreceding = taskDependencyRepository.findByPrecedingTaskId(taskId).size();
+		int asSucceeding = taskDependencyRepository.findBySucceedingTaskId(taskId).size();
+		if (asPreceding > 0 || asSucceeding > 0) {
+			throw new IllegalStateException(
+					"このタスクは" + (asPreceding + asSucceeding) + "件の依存関係に使われているため削除できません。先に依存関係を解除してください。");
+		}
+
 		taskRepository.delete(task);
 	}
 

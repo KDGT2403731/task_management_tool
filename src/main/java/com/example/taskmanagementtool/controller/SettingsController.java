@@ -19,7 +19,6 @@ import com.example.taskmanagementtool.service.IntegrationService;
 @Controller
 @RequestMapping("/settings/integration")
 public class SettingsController {
-
 	private final IntegrationService integrationService;
 
 	public SettingsController(IntegrationService integrationService) {

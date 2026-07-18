@@ -1362,3 +1362,53 @@ section h2 {
 		justify-content: flex-start;
 	}
 }
+
+/* ==========================================================================
+   Integration (外部サービス連携)
+   ========================================================================== */
+.integration-card {
+	background: var(--color-bg-raised);
+	border: 1px solid var(--color-line-faint);
+	border-radius: var(--radius-md);
+	padding: 28px;
+	margin-bottom: 20px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 24px;
+	transition: border-color 0.15s ease;
+}
+
+.integration-card:hover {
+	border-color: var(--color-line);
+}
+
+.integration-card h2 {
+	font-family: var(--font-display);
+	font-size: 1.15rem;
+	margin: 0 0 6px;
+}
+
+.integration-card p {
+	font-size: 0.9rem;
+	color: var(--color-ink-soft);
+	margin: 0;
+	max-width: 54ch;
+}
+
+.integration-card .btn {
+	white-space: nowrap;
+	flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+	.integration-card {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 16px;
+	}
+	
+	.integration-card .btn {
+		width: 100%;
+	}
+}

@@ -67,6 +67,7 @@ public class TaskController {
 	public String createTaskForm(@PathVariable("projectId") Long projectId, Model model) {
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("task", new Task());
+		model.addAttribute("assignableUsers", taskService.listAssignableUsers(projectId));
 		return "task/create";
 	}
 

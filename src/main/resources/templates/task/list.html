@@ -1,19 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ja">
-
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="_csrf" th:content="${_csrf.token}">
-	<meta name="_csrf_header" th:content="${_csrf.headerName}">
-	<title th:text="${project.name} + ' タスク一覧 | 工程ノート'">タスク一覧 | 工程ノート</title>
+	<title th:text="${project.name} + ' | 工程ノート'">タスク一覧 | 工程ノート</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
 <body>
 
 	<header class="site-header">
@@ -23,10 +20,9 @@
 				<span class="brand-sub">工程ノート</span>
 			</a>
 			<nav class="nav-actions">
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
-				<form class="logout-form" th:action="@{/logout}" method="post">
-					<button type="submit" class="btn btn-ghost">ログアウト</button>
-				</form>
+				<a th:href="@{/projects/{projectId}/tasks/gantt(projectId=${projectId})}" class="btn btn-ghost">ガントチャート</a>
+				<a th:href="@{/projects/{projectId}/tasks/recurring(projectId=${projectId})}" class="btn btn-ghost">繰り返し設定</a>
+				<a th:href="@{/projects/{projectId}/tasks/create(projectId=${projectId})}" class="btn btn-primary">＋ 新規タスク</a>
 			</nav>
 		</div>
 	</header>
@@ -34,162 +30,150 @@
 	<main class="app-main">
 		<div class="container">
 
-			<div class="page-header">
+			<div class="page-head">
 				<div>
-					<p class="eyebrow" th:text="${project.name}">プロジェクト名</p>
-					<h1>タスク</h1>
-				</div>
-				<div class="kanban-toolbar" style="margin-bottom:0;">
-					<a th:href="@{/projects/{id}/tasks/gantt(id=${projectId})}" class="btn btn-ghost">ガントチャート</a>
-					<a th:href="@{/projects/{id}/tasks/create(id=${projectId})}" class="btn btn-primary">新しいタスク</a>
+					<p class="section-eyebrow" th:text="${project.name}">プロジェクト名</p>
+					<h1 th:text="${project.name}">プロジェクト名</h1>
 				</div>
 			</div>
+
+			<div class="kanban-toolbar"></div>
 
 			<div class="kanban-board">
 
-				<section class="kanban-column" data-status="TODO">
+				<!-- 未着手 -->
+				<section class="kanban-column">
 					<div class="kanban-column-head">
 						<h2>未着手</h2>
-						<span class="kanban-count" th:text="${#lists.size(tasks.?[status == 'TODO'])}">0</span>
+						<span class="kanban-count"
+							  th:text="${tasks.?[status == 'TODO'].size()}">0</span>
 					</div>
 					<div class="kanban-cards" data-status="TODO">
-						<a class="kanban-card" draggable="true" th:each="task : ${tasks}"
-							th:if="${task.status == 'TODO'}" th:data-task-id="${task.id}"
-							th:href="@{/projects/{pid}/tasks/{tid}(pid=${projectId},tid=${task.id})}">
-							<p class="kanban-card-title" th:text="${task.title}">タスク名</p>
+						<a class="kanban-card" draggable="true"
+						   th:each="task : ${tasks}" th:if="${task.status == 'TODO'}"
+						   th:data-task-id="${task.id}"
+						   th:href="@{/projects/{projectId}/tasks/{taskId}(projectId=${projectId}, taskId=${task.id})}">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
 							<div class="kanban-card-meta">
-								<span th:class="${'priority-badge ' +
-									(task.priority == 'HIGH' ? 'priority-high' :
-									(task.priority == 'LOW' ? 'priority-low' : 'priority-medium'))}" th:text="${task.priority}">MEDIUM</span>
-								<span class="kanban-card-due" th:if="${task.dueDate != null}"
-									th:text="${#temporals.format(task.dueDate, 'MM/dd')}">01/01</span>
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
 							</div>
-							<p class="kanban-card-assignee" th:if="${task.assignee != null}"
-								th:text="${task.assignee.name}">担当者名</p>
+							<div class="kanban-card-assignee"
+								 th:text="${task.assignee != null ? task.assignee.name : '未アサイン'}"></div>
 						</a>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'TODO'].isEmpty()}">タスクはありません</p>
 					</div>
 				</section>
 
-				<section class="kanban-column" data-status="IN_PROGRESS">
+				<!-- 進行中 -->
+				<section class="kanban-column">
 					<div class="kanban-column-head">
 						<h2>進行中</h2>
-						<span class="kanban-count" th:text="${#lists.size(tasks.?[status == 'IN_PROGRESS'])}">0</span>
+						<span class="kanban-count"
+							  th:text="${tasks.?[status == 'IN_PROGRESS'].size()}">0</span>
 					</div>
 					<div class="kanban-cards" data-status="IN_PROGRESS">
-						<a class="kanban-card" draggable="true" th:each="task : ${tasks}"
-							th:if="${task.status == 'IN_PROGRESS'}" th:data-task-id="${task.id}"
-							th:href="@{/projects/{pid}/tasks/{tid}(pid=${projectId},tid=${task.id})}">
-							<p class="kanban-card-title" th:text="${task.title}">タスク名</p>
+						<a class="kanban-card" draggable="true"
+						   th:each="task : ${tasks}" th:if="${task.status == 'IN_PROGRESS'}"
+						   th:data-task-id="${task.id}"
+						   th:href="@{/projects/{projectId}/tasks/{taskId}(projectId=${projectId}, taskId=${task.id})}">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
 							<div class="kanban-card-meta">
-								<span th:class="${'priority-badge ' +
-									(task.priority == 'HIGH' ? 'priority-high' :
-									(task.priority == 'LOW' ? 'priority-low' : 'priority-medium'))}" th:text="${task.priority}">MEDIUM</span>
-								<span class="kanban-card-due" th:if="${task.dueDate != null}"
-									th:text="${#temporals.format(task.dueDate, 'MM/dd')}">01/01</span>
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
 							</div>
-							<p class="kanban-card-assignee" th:if="${task.assignee != null}"
-								th:text="${task.assignee.name}">担当者名</p>
+							<div class="kanban-card-assignee"
+								 th:text="${task.assignee != null ? task.assignee.name : '未アサイン'}"></div>
 						</a>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'IN_PROGRESS'].isEmpty()}">タスクはありません</p>
 					</div>
 				</section>
 
-				<section class="kanban-column" data-status="DONE">
+				<!-- 完了 -->
+				<section class="kanban-column">
 					<div class="kanban-column-head">
 						<h2>完了</h2>
-						<span class="kanban-count" th:text="${#lists.size(tasks.?[status == 'DONE'])}">0</span>
+						<span class="kanban-count"
+							  th:text="${tasks.?[status == 'DONE'].size()}">0</span>
 					</div>
 					<div class="kanban-cards" data-status="DONE">
-						<a class="kanban-card" draggable="true" th:each="task : ${tasks}"
-							th:if="${task.status == 'DONE'}" th:data-task-id="${task.id}"
-							th:href="@{/projects/{pid}/tasks/{tid}(pid=${projectId},tid=${task.id})}">
-							<p class="kanban-card-title" th:text="${task.title}">タスク名</p>
+						<a class="kanban-card" draggable="true"
+						   th:each="task : ${tasks}" th:if="${task.status == 'DONE'}"
+						   th:data-task-id="${task.id}"
+						   th:href="@{/projects/{projectId}/tasks/{taskId}(projectId=${projectId}, taskId=${task.id})}">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
 							<div class="kanban-card-meta">
-								<span th:class="${'priority-badge ' +
-									(task.priority == 'HIGH' ? 'priority-high' :
-									(task.priority == 'LOW' ? 'priority-low' : 'priority-medium'))}" th:text="${task.priority}">MEDIUM</span>
-								<span class="kanban-card-due" th:if="${task.dueDate != null}"
-									th:text="${#temporals.format(task.dueDate, 'MM/dd')}">01/01</span>
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
 							</div>
-							<p class="kanban-card-assignee" th:if="${task.assignee != null}"
-								th:text="${task.assignee.name}">担当者名</p>
+							<div class="kanban-card-assignee"
+								 th:text="${task.assignee != null ? task.assignee.name : '未アサイン'}"></div>
 						</a>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'DONE'].isEmpty()}">タスクはありません</p>
 					</div>
 				</section>
 
 			</div>
-
-			<div class="empty-state" th:if="${tasks == null or #lists.isEmpty(tasks)}">
-				<p>まだタスクがありません。</p>
-				<a th:href="@{/projects/{id}/tasks/create(id=${projectId})}" class="btn btn-primary">最初のタスクを作る</a>
-			</div>
-
 		</div>
 	</main>
 
 	<footer class="site-footer">
 		<div class="container">
 			<p>&copy; 2026 工程ノート</p>
-			<nav class="foot-links">
-				<a href="/dashboard">ダッシュボード</a>
-				<a href="/projects">プロジェクト</a>
-			</nav>
 		</div>
 	</footer>
 
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		const projectId = /*[[${projectId}]]*/ 0;
-		const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-		const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+		/*]]>*/
 
 		let draggedCard = null;
 
-		document.querySelectorAll('.kanban-card').forEach(function (card) {
-			card.addEventListener('dragstart', function () {
+		document.querySelectorAll('.kanban-card').forEach(card => {
+			card.addEventListener('dragstart', (e) => {
+				e.preventDefault ? null : null;
 				draggedCard = card;
 				card.classList.add('dragging');
 			});
-			card.addEventListener('dragend', function () {
+			card.addEventListener('dragend', () => {
 				card.classList.remove('dragging');
-				draggedCard = null;
+			});
+			// カードはリンクでもあるため、ドラッグ中はクリック遷移を抑止する
+			card.addEventListener('click', (e) => {
+				if (card.classList.contains('dragging')) e.preventDefault();
 			});
 		});
 
-		document.querySelectorAll('.kanban-cards').forEach(function (column) {
-			column.addEventListener('dragover', function (e) {
+		document.querySelectorAll('.kanban-cards').forEach(col => {
+			col.addEventListener('dragover', (e) => {
 				e.preventDefault();
-				column.classList.add('drag-over');
+				col.classList.add('drag-over');
 			});
-			column.addEventListener('dragleave', function () {
-				column.classList.remove('drag-over');
-			});
-			column.addEventListener('drop', function (e) {
+			col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+			col.addEventListener('drop', (e) => {
 				e.preventDefault();
-				column.classList.remove('drag-over');
+				col.classList.remove('drag-over');
 				if (!draggedCard) return;
-
 				const taskId = draggedCard.dataset.taskId;
-				const newStatus = column.dataset.status;
+				const newStatus = col.dataset.status;
 
-				fetch('/projects/' + projectId + '/tasks/' + taskId + '/status', {
+				fetch(`/projects/${projectId}/tasks/${taskId}/status`, {
 					method: 'POST',
-					headers: {
-						'Content-Type': 'application/x-www-form-urlencoded',
-						[csrfHeader]: csrfToken
-					},
-					body: 'status=' + encodeURIComponent(newStatus)
-				}).then(function (res) {
-					if (res.ok) {
-						location.reload();
-					} else {
-						alert('ステータスの更新に失敗しました。');
-					}
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: `status=${encodeURIComponent(newStatus)}`
+				}).then(res => {
+					if (res.ok) location.reload();
+					else alert('ステータス更新に失敗しました');
 				});
 			});
 		});
-		/*]]>*/
 	</script>
-
 </body>
-
-</html>
+</html></html>

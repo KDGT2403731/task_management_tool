@@ -1,18 +1,18 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ja">
-
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${task.title} + ' | 工程ノート'">タスク詳細 | 工程ノート</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
 <body>
+
 	<header class="site-header">
 		<div class="container">
 			<a href="/dashboard" class="brand">
@@ -20,103 +20,265 @@
 				<span class="brand-sub">工程ノート</span>
 			</a>
 			<nav class="nav-actions">
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
-				<form class="logout-form" th:action="@{/logout}" method="post">
-					<button type="submit" class="btn btn-ghost">ログアウト</button>
-				</form>
+				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧へ戻る</a>
 			</nav>
 		</div>
 	</header>
-	<main class="container page-main">
-		<div class="task-detail">
-			<div class="task-header">
-				<h1 th:text="${task.title}">タスクタイトル</h1>
-				<div class="task-actions">
-					<a th:href="@{/projects/{projectId}/tasks/{taskId}/edit(projectId=${projectId},taskId=${task.id})}"
-						class="btn">編集</a>
-					<form
-						th:action="@{/projects/{projectId}/tasks/{taskId}/delete(projectId=${projectId},taskId=${task.id})}"
-						method="post" onsubmit="return confirm('このタスクを削除してもよいですか？');" style="display:inline">
-						<input type="hidden" name="_method" value="delete" />
-						<button type="submit" class="btn btn-danger">削除</button>
-					</form>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="detail-head">
+				<div>
+					<p class="section-eyebrow">タスク詳細</p>
+					<h1 th:text="${task.title}">タスクタイトル</h1>
+				</div>
+				<div class="detail-actions">
+					<span class="status-badge"
+						  th:classappend="${task.status == 'DONE'} ? 'badge-done' : (${task.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+						  th:text="${task.status == 'DONE'} ? '完了' : (${task.status == 'IN_PROGRESS'} ? '進行中' : '未着手')">
+					</span>
 				</div>
 			</div>
 
-			<section class="task-meta">
-				<div class="meta-item"><strong>ステータス:</strong>
-					<span class="status-badge"
-						th:text="${task.status}"
-						th:classappend="${task.status == 'TODO'} ? ' badge-todo' : (${task.status == 'IN_PROGRESS'} ) ? ' badge-inprogress' : (${task.status == 'DONE'}) ? ' badge-done' : ''">未設定</span>
+			<div class="detail-meta">
+				<div class="meta-item">
+					<span class="meta-label">担当者</span>
+					<span th:text="${task.assignee != null ? task.assignee.name : '未アサイン'}"></span>
 				</div>
-				<div class="meta-item"><strong>優先度:</strong>
-					<span th:text="${task.priority}">中</span>
+				<div class="meta-item">
+					<span class="meta-label">優先度</span>
+					<span class="priority-badge"
+						  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+						  th:text="${task.priority}"></span>
 				</div>
-				<div class="meta-item"><strong>担当者:</strong>
-					<span th:text="${task.assignee != null ? task.assignee.name : '未割当'}">未割当</span>
+				<div class="meta-item">
+					<span class="meta-label">開始日</span>
+					<span th:text="${task.startDate}"></span>
 				</div>
-				<div class="meta-item"><strong>期限:</strong>
-					<span th:text="${task.dueDate != null ? #dates.format(task.dueDate,'yyyy-MM-dd') : 'なし'}">なし</span>
+				<div class="meta-item">
+					<span class="meta-label">期限</span>
+					<span th:text="${task.dueDate}"></span>
 				</div>
-			</section>
+				<div class="meta-item">
+					<span class="meta-label">見積 / 実績</span>
+					<span th:text="(${task.planHours} ?: '-') + 'h / ' + (${task.actualHours} ?: '-') + 'h'"></span>
+				</div>
+			</div>
 
-			<section class="task-description">
-				<h2>説明</h2>
-				<div class="description-text" th:text="${task.description}">タスクの詳細説明がここに入ります。</div>
-			</section>
+			<p class="detail-description" th:text="${task.description}"></p>
 
-			<section class="task-tags" th:if="${task.tags != null}">
-				<h3>タグ</h3>
-				<div class="tags">
-					<!-- タグをクリックするとプロジェクト内タスク一覧をタグでフィルタする想定 -->
-					<a class="tag" th:each="tag : ${task.tags}"
-						th:href="@{/projects/{id}/tasks(id=${projectId},tag=${tag.id})}"
-						th:text="${tag.name}">タグ名</a>
+			<!-- ===== 編集フォーム ===== -->
+			<form class="form-card" th:action="@{/projects/{projectId}/tasks/{taskId}/edit(projectId=${projectId}, taskId=${taskId})}"
+				  method="post">
+
+				<div class="form-field">
+					<label for="title">タイトル</label>
+					<input type="text" id="title" name="title" th:value="${task.title}" required maxlength="255">
 				</div>
-			</section>
 
-			<section class="task-comments">
-				<h3>コメント</h3>
-				<div class="comments-list" th:if="${task.comments != null and #lists.isNotEmpty(task.comments)}">
-					<div class="comment" th:each="c : ${task.comments}">
-						<!-- avatar + meta + body -->
-						<div>
-							<img class="avatar" th:src="${c.author != null && c.author.avatarUrl != null} ? ${c.author.avatarUrl} : '/img/avatar-placeholder.png'"
-								alt="avatar" />
-						</div>
-						<div>
-							<div class="comment-meta">
-								<strong th:text="${c.author != null ? c.author.name : '名無し'}">名無し</strong>
-								<span class="comment-date"
-									th:text="${#dates.format(c.createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 00:00</span>
-							</div>
-							<div class="comment-body" th:text="${c.content}">コメント本文</div>
-						</div>
+				<div class="form-field">
+					<label for="description">詳細</label>
+					<textarea id="description" name="description" rows="4" th:text="${task.description}"></textarea>
+				</div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="priority">優先度</label>
+						<select id="priority" name="priority">
+							<option value="HIGH" th:selected="${task.priority == 'HIGH'}">高</option>
+							<option value="MEDIUM" th:selected="${task.priority == 'MEDIUM'}">中</option>
+							<option value="LOW" th:selected="${task.priority == 'LOW'}">低</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="assigneeId">担当者</label>
+						<select id="assigneeId" name="assigneeId">
+							<option value="">未アサイン</option>
+							<option th:each="u : ${assignableUsers}"
+									th:value="${u.id}" th:text="${u.name}"
+									th:selected="${task.assignee != null and task.assignee.id == u.id}"></option>
+						</select>
 					</div>
 				</div>
-				<div th:if="${task.comments == null or #lists.isEmpty(task.comments)}">コメントはまだありません。最初のコメントを残しましょう。</div>
 
-				<form
-					th:action="@{/projects/{projectId}/tasks/{taskId}/comments(projectId=${projectId},taskId=${task.id})}"
-					method="post" class="comment-form">
-					<label for="comment">コメントを追加</label>
-					<textarea id="comment" name="content" rows="4" required></textarea>
-					<button type="submit" class="btn">投稿</button>
-				</form>
-			</section>
+				<div class="form-row">
+					<div class="form-field">
+						<label for="startDate">開始日</label>
+						<input type="date" id="startDate" name="startDate" th:value="${task.startDate}">
+					</div>
+					<div class="form-field">
+						<label for="dueDate">期限</label>
+						<input type="date" id="dueDate" name="dueDate" th:value="${task.dueDate}">
+					</div>
+				</div>
 
-			<nav class="task-footer">
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
-			</nav>
+				<div class="form-row">
+					<div class="form-field">
+						<label for="planHours">見積工数（時間）</label>
+						<input type="number" id="planHours" name="planHours" th:value="${task.planHours}" min="0">
+					</div>
+					<div class="form-field">
+						<label for="actualHours">実績工数（時間）</label>
+						<input type="number" id="actualHours" name="actualHours" th:value="${task.actualHours}" min="0">
+					</div>
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">更新する</button>
+				</div>
+			</form>
+
+			<!-- ===== ステータス変更 ===== -->
+			<div class="panel" style="margin-top:24px;">
+				<div class="panel-head"><h2>ステータス変更</h2></div>
+				<div class="task-actions">
+					<button type="button" class="btn btn-ghost status-btn" data-status="TODO">未着手</button>
+					<button type="button" class="btn btn-ghost status-btn" data-status="IN_PROGRESS">進行中</button>
+					<button type="button" class="btn btn-ghost status-btn" data-status="DONE">完了</button>
+				</div>
+			</div>
+
+			<!-- ===== 依存関係 ===== -->
+			<div class="dashboard-grid" style="margin-top:24px;">
+				<div class="panel">
+					<div class="panel-head"><h2>前提タスク</h2></div>
+					<ul class="milestone-list">
+						<li class="milestone-item" th:each="dep : ${precedingDependencies}">
+							<div class="milestone-main">
+								<p class="milestone-title" th:text="${dep.precedingTask.title}"></p>
+								<div class="milestone-meta">
+									<span th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
+								</div>
+							</div>
+							<span class="status-badge"
+								  th:classappend="${dep.precedingTask.status == 'DONE'} ? 'badge-done' : (${dep.precedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+								  th:text="${dep.precedingTask.status}"></span>
+						</li>
+					</ul>
+					<div class="empty-state" th:if="${#lists.isEmpty(precedingDependencies)}">
+						<p>前提タスクはありません</p>
+					</div>
+				</div>
+
+				<div class="panel">
+					<div class="panel-head"><h2>後続タスク</h2></div>
+					<ul class="milestone-list">
+						<li class="milestone-item" th:each="dep : ${succeedingDependencies}">
+							<div class="milestone-main">
+								<p class="milestone-title" th:text="${dep.succeedingTask.title}"></p>
+								<div class="milestone-meta">
+									<span th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
+								</div>
+							</div>
+							<span class="status-badge"
+								  th:classappend="${dep.succeedingTask.status == 'DONE'} ? 'badge-done' : (${dep.succeedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+								  th:text="${dep.succeedingTask.status}"></span>
+						</li>
+					</ul>
+					<div class="empty-state" th:if="${#lists.isEmpty(succeedingDependencies)}">
+						<p>後続タスクはありません</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- ===== 依存関係の追加 ===== -->
+			<form class="form-card" style="margin-top:24px;"
+				  th:action="@{/projects/{projectId}/tasks/{taskId}/dependencies/add(projectId=${projectId}, taskId=${taskId})}"
+				  method="post">
+				<div class="panel-head"><h2>前提タスクを追加</h2></div>
+
+				<div class="form-field">
+					<label for="precedingTaskId">前提タスク</label>
+					<select id="precedingTaskId" name="precedingTaskId" required>
+						<option th:each="t : ${otherTasks}" th:value="${t.id}" th:text="${t.title}"></option>
+					</select>
+				</div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="dependencyType">依存タイプ</label>
+						<select id="dependencyType" name="dependencyType">
+							<option value="FS" selected>FS（完了→開始）</option>
+							<option value="SS">SS（開始→開始）</option>
+							<option value="FF">FF（完了→完了）</option>
+							<option value="SF">SF（開始→完了）</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="lagDays">ラグ日数</label>
+						<input type="number" id="lagDays" name="lagDays" value="0">
+					</div>
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-ghost">追加</button>
+				</div>
+			</form>
+
+			<!-- ===== 繰り返し設定 ===== -->
+			<form class="form-card" style="margin-top:24px;"
+				  th:action="@{/projects/{projectId}/tasks/{taskId}/recurring(projectId=${projectId}, taskId=${taskId})}"
+				  method="post">
+				<div class="panel-head"><h2>繰り返しタスクとして登録</h2></div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="frequency">頻度</label>
+						<select id="frequency" name="frequency" required>
+							<option th:each="f : ${frequencies}" th:value="${f}" th:text="${f}"></option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="endDate">終了日</label>
+						<input type="date" id="endDate" name="endDate">
+					</div>
+				</div>
+
+				<div class="form-field">
+					<label for="cronExpression">Cron式（任意）</label>
+					<input type="text" id="cronExpression" name="cronExpression" placeholder="0 0 9 1 * ?">
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-ghost">登録</button>
+				</div>
+			</form>
+
+			<!-- ===== 削除 ===== -->
+			<form th:action="@{/projects/{projectId}/tasks/{taskId}/delete(projectId=${projectId}, taskId=${taskId})}"
+				  method="post" style="margin-top:24px;"
+				  onsubmit="return confirm('このタスクを削除しますか？');">
+				<button type="submit" class="btn btn-danger">タスクを削除</button>
+			</form>
+
 		</div>
 	</main>
 
 	<footer class="site-footer">
 		<div class="container">
-			<small>© <span th:text="${#dates.format(#dates.createNow(),'yyyy')}">2026</span> Kotei</small>
+			<p>&copy; 2026 工程ノート</p>
 		</div>
 	</footer>
 
-</body>
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		const projectId = /*[[${projectId}]]*/ 0;
+		const taskId = /*[[${taskId}]]*/ 0;
+		/*]]>*/
 
+		document.querySelectorAll('.status-btn').forEach(btn => {
+			btn.addEventListener('click', () => {
+				fetch(`/projects/${projectId}/tasks/${taskId}/status`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					body: `status=${encodeURIComponent(btn.dataset.status)}`
+				}).then(res => {
+					if (res.ok) location.reload();
+					else alert('ステータス更新に失敗しました');
+				});
+			});
+		});
+	</script>
+</body>
 </html>

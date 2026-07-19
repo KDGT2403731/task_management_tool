@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title th:text="${project.name} + ' | 工程ノート '">タスク作成 | 工程ノート</title>
+	<title>タスク新規作成 | 工程ノート</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="stylesheet"
-		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body>
+
 	<header class="site-header">
 		<div class="container">
 			<a href="/dashboard" class="brand">
@@ -20,53 +22,82 @@
 				<span class="brand-sub">工程ノート</span>
 			</a>
 			<nav class="nav-actions">
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクトへ戻る</a>
+				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧へ戻る</a>
 				<form class="logout-form" th:action="@{/logout}" method="post">
 					<button type="submit" class="btn btn-ghost">ログアウト</button>
 				</form>
 			</nav>
 		</div>
 	</header>
-	<main class="container page-main">
-		<h1 th:text="'タスク作成: ' + ${project.name}">タスク作成</h1>
-		<form th:action="@{/projects/{projectId}/tasks/create(projectId=${projectId})}" method="post">
-			<div class="form-group">
-				<label for="title">タイトル</label>
-				<input type="text" id="title" name="title" required>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-head">
+				<h1>タスク新規作成</h1>
 			</div>
-			<div class="form-group">
-				<label for="description">説明</label>
-				<textarea id="description" name="description" rows="5" required></textarea>
-			</div>
-			<div class="form-group">
-				<label for="status">ステータス</label>
-				<select id="status" name="status" required>
-					<option th:each="status : ${statuses}" th:value="${status}" th:text="${status}"></option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="priority">優先度</label>
-				<select id="priority" name="priority" required>
-					<option th:each="priority : ${priorities}" th:value="${priority}" th:text="${priority}"></option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="assignee">担当者</label>
-				<select id="assignee" name="assigneeId">
-					<option value="">未割当</option>
-					<option th:each="user : ${users}" th:value="${user.id}" th :text="${user.name}"></option>
-				</select>
-			</div>
-			<div class="form-group">
-				<label for="dueDate">期限</label>
-				<input type="date" id="dueDate" name="dueDate">
-			</div>
-			<div class="form-actions">
-				<button type="submit" class="btn btn-primary">作成</button>
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">キャンセル</a>
-			</div>
-		</form>
+
+			<form class="form-card" th:action="@{/projects/{projectId}/tasks/create(projectId=${projectId})}"
+				method="post">
+
+				<div class="form-field">
+					<label for="title">タイトル <span style="color:#B8412C">*</span></label>
+					<input type="text" id="title" name="title" required maxlength="255">
+				</div>
+
+				<div class="form-field">
+					<label for="description">詳細</label>
+					<textarea id="description" name="description" rows="4"></textarea>
+				</div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="priority">優先度</label>
+						<select id="priority" name="priority">
+							<option value="HIGH">高</option>
+							<option value="MEDIUM" selected>中</option>
+							<option value="LOW">低</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="assigneeId">担当者</label>
+						<select id="assigneeId" name="assigneeId">
+							<option value="">未アサイン</option>
+							<option th:each="u : ${assignableUsers}" th:value="${u.id}" th:text="${u.name}"></option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="startDate">開始日</label>
+						<input type="date" id="startDate" name="startDate">
+					</div>
+					<div class="form-field">
+						<label for="dueDate">期限</label>
+						<input type="date" id="dueDate" name="dueDate">
+					</div>
+				</div>
+
+				<div class="form-field">
+					<label for="planHours">見積工数（時間）</label>
+					<input type="number" id="planHours" name="planHours" min="0">
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-primary">作成する</button>
+					<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">キャンセル</a>
+				</div>
+			</form>
+
+		</div>
 	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
 </body>
 
-</html>
+</html>ml>

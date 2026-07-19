@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
 		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
 	<header class="site-header">
@@ -21,6 +23,9 @@
 			</a>
 			<nav class="nav-actions">
 				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧へ戻る</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
 			</nav>
 		</div>
 	</header>
@@ -35,8 +40,8 @@
 				</div>
 				<div class="detail-actions">
 					<span class="status-badge"
-						  th:classappend="${task.status == 'DONE'} ? 'badge-done' : (${task.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
-						  th:text="${task.status == 'DONE'} ? '完了' : (${task.status == 'IN_PROGRESS'} ? '進行中' : '未着手')">
+						th:classappend="${task.status == 'DONE'} ? 'badge-done' : (${task.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+						th:text="${task.status == 'DONE'} ? '完了' : (${task.status == 'IN_PROGRESS'} ? '進行中' : '未着手')">
 					</span>
 				</div>
 			</div>
@@ -49,8 +54,8 @@
 				<div class="meta-item">
 					<span class="meta-label">優先度</span>
 					<span class="priority-badge"
-						  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
-						  th:text="${task.priority}"></span>
+						th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+						th:text="${task.priority}"></span>
 				</div>
 				<div class="meta-item">
 					<span class="meta-label">開始日</span>
@@ -69,8 +74,9 @@
 			<p class="detail-description" th:text="${task.description}"></p>
 
 			<!-- ===== 編集フォーム ===== -->
-			<form class="form-card" th:action="@{/projects/{projectId}/tasks/{taskId}/edit(projectId=${projectId}, taskId=${taskId})}"
-				  method="post">
+			<form class="form-card"
+				th:action="@{/projects/{projectId}/tasks/{taskId}/edit(projectId=${projectId}, taskId=${taskId})}"
+				method="post">
 
 				<div class="form-field">
 					<label for="title">タイトル</label>
@@ -95,9 +101,8 @@
 						<label for="assigneeId">担当者</label>
 						<select id="assigneeId" name="assigneeId">
 							<option value="">未アサイン</option>
-							<option th:each="u : ${assignableUsers}"
-									th:value="${u.id}" th:text="${u.name}"
-									th:selected="${task.assignee != null and task.assignee.id == u.id}"></option>
+							<option th:each="u : ${assignableUsers}" th:value="${u.id}" th:text="${u.name}"
+								th:selected="${task.assignee != null and task.assignee.id == u.id}"></option>
 						</select>
 					</div>
 				</div>
@@ -131,7 +136,9 @@
 
 			<!-- ===== ステータス変更 ===== -->
 			<div class="panel" style="margin-top:24px;">
-				<div class="panel-head"><h2>ステータス変更</h2></div>
+				<div class="panel-head">
+					<h2>ステータス変更</h2>
+				</div>
 				<div class="task-actions">
 					<button type="button" class="btn btn-ghost status-btn" data-status="TODO">未着手</button>
 					<button type="button" class="btn btn-ghost status-btn" data-status="IN_PROGRESS">進行中</button>
@@ -142,18 +149,21 @@
 			<!-- ===== 依存関係 ===== -->
 			<div class="dashboard-grid" style="margin-top:24px;">
 				<div class="panel">
-					<div class="panel-head"><h2>前提タスク</h2></div>
+					<div class="panel-head">
+						<h2>前提タスク</h2>
+					</div>
 					<ul class="milestone-list">
 						<li class="milestone-item" th:each="dep : ${precedingDependencies}">
 							<div class="milestone-main">
 								<p class="milestone-title" th:text="${dep.precedingTask.title}"></p>
 								<div class="milestone-meta">
-									<span th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
+									<span
+										th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
 								</div>
 							</div>
 							<span class="status-badge"
-								  th:classappend="${dep.precedingTask.status == 'DONE'} ? 'badge-done' : (${dep.precedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
-								  th:text="${dep.precedingTask.status}"></span>
+								th:classappend="${dep.precedingTask.status == 'DONE'} ? 'badge-done' : (${dep.precedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+								th:text="${dep.precedingTask.status}"></span>
 						</li>
 					</ul>
 					<div class="empty-state" th:if="${#lists.isEmpty(precedingDependencies)}">
@@ -162,18 +172,21 @@
 				</div>
 
 				<div class="panel">
-					<div class="panel-head"><h2>後続タスク</h2></div>
+					<div class="panel-head">
+						<h2>後続タスク</h2>
+					</div>
 					<ul class="milestone-list">
 						<li class="milestone-item" th:each="dep : ${succeedingDependencies}">
 							<div class="milestone-main">
 								<p class="milestone-title" th:text="${dep.succeedingTask.title}"></p>
 								<div class="milestone-meta">
-									<span th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
+									<span
+										th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
 								</div>
 							</div>
 							<span class="status-badge"
-								  th:classappend="${dep.succeedingTask.status == 'DONE'} ? 'badge-done' : (${dep.succeedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
-								  th:text="${dep.succeedingTask.status}"></span>
+								th:classappend="${dep.succeedingTask.status == 'DONE'} ? 'badge-done' : (${dep.succeedingTask.status == 'IN_PROGRESS'} ? 'badge-inprogress' : 'badge-todo')"
+								th:text="${dep.succeedingTask.status}"></span>
 						</li>
 					</ul>
 					<div class="empty-state" th:if="${#lists.isEmpty(succeedingDependencies)}">
@@ -184,9 +197,11 @@
 
 			<!-- ===== 依存関係の追加 ===== -->
 			<form class="form-card" style="margin-top:24px;"
-				  th:action="@{/projects/{projectId}/tasks/{taskId}/dependencies/add(projectId=${projectId}, taskId=${taskId})}"
-				  method="post">
-				<div class="panel-head"><h2>前提タスクを追加</h2></div>
+				th:action="@{/projects/{projectId}/tasks/{taskId}/dependencies/add(projectId=${projectId}, taskId=${taskId})}"
+				method="post">
+				<div class="panel-head">
+					<h2>前提タスクを追加</h2>
+				</div>
 
 				<div class="form-field">
 					<label for="precedingTaskId">前提タスク</label>
@@ -218,9 +233,11 @@
 
 			<!-- ===== 繰り返し設定 ===== -->
 			<form class="form-card" style="margin-top:24px;"
-				  th:action="@{/projects/{projectId}/tasks/{taskId}/recurring(projectId=${projectId}, taskId=${taskId})}"
-				  method="post">
-				<div class="panel-head"><h2>繰り返しタスクとして登録</h2></div>
+				th:action="@{/projects/{projectId}/tasks/{taskId}/recurring(projectId=${projectId}, taskId=${taskId})}"
+				method="post">
+				<div class="panel-head">
+					<h2>繰り返しタスクとして登録</h2>
+				</div>
 
 				<div class="form-row">
 					<div class="form-field">
@@ -247,8 +264,7 @@
 
 			<!-- ===== 削除 ===== -->
 			<form th:action="@{/projects/{projectId}/tasks/{taskId}/delete(projectId=${projectId}, taskId=${taskId})}"
-				  method="post" style="margin-top:24px;"
-				  onsubmit="return confirm('このタスクを削除しますか？');">
+				method="post" style="margin-top:24px;" onsubmit="return confirm('このタスクを削除しますか？');">
 				<button type="submit" class="btn btn-danger">タスクを削除</button>
 			</form>
 
@@ -271,7 +287,7 @@
 			btn.addEventListener('click', () => {
 				fetch(`/projects/${projectId}/tasks/${taskId}/status`, {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					headers: {'Content-Type': 'application/x-www-form-urlencoded'},
 					body: `status=${encodeURIComponent(btn.dataset.status)}`
 				}).then(res => {
 					if (res.ok) location.reload();
@@ -281,4 +297,5 @@
 		});
 	</script>
 </body>
+
 </html>

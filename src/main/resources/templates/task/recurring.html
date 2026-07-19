@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>繰り返しタスク設定 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧へ戻る</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-head">
+				<h1>繰り返しタスク設定</h1>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head">
+					<h2>登録済みの繰り返しルール</h2>
+				</div>
+
+				<ul class="milestone-list">
+					<li class="milestone-item" th:each="rule : ${rules}">
+						<div class="milestone-main">
+							<p class="milestone-title" th:text="${rule.templateTitle}"></p>
+							<div class="milestone-meta">
+								<span th:text="${rule.frequency}"></span>
+								<span>/</span>
+								<span th:text="${rule.assignee != null ? rule.assignee.name : '未アサイン'}"></span>
+								<span>/</span>
+								<span>次回: </span>
+								<span th:text="${rule.nextExecutionDate}"></span>
+							</div>
+						</div>
+						<span class="status-badge"
+							th:classappend="${rule.isActive} ? 'status-achieved' : 'status-not-started'"
+							th:text="${rule.isActive} ? '有効' : '無効'"></span>
+					</li>
+				</ul>
+
+				<div class="empty-state" th:if="${#lists.isEmpty(rules)}">
+					<p>繰り返しルールはまだ登録されていません</p>
+				</div>
+			</div>
+
+			<p class="detail-description" style="margin-top:20px;">
+				新しい繰り返しルールは、各タスクの詳細画面から「このタスクを繰り返しタスクとして登録」で作成できます。
+			</p>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+</body>
+
+</html>

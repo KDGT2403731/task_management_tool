@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ガントチャート | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<style>
+		/* index.htmlのgantt-cardは4週固定のデモ用グリッドのため、
+		   実データ表示用にラベル列幅とバーの絶対配置だけ調整する */
+		.gantt-card .gantt-row {
+			grid-template-columns: 160px 1fr;
+		}
+
+		.gantt-card .gantt-bar {
+			transform: none;
+			animation: none;
+			left: var(--bar-left, 0);
+			width: var(--bar-width, 10%);
+		}
+	</style>
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧へ戻る</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-head">
+				<h1>ガントチャート</h1>
+			</div>
+
+			<div class="gantt-card" id="gantt-container">
+				<div class="gantt-row" th:each="task : ${tasks}"
+					th:if="${task.startDate != null and task.dueDate != null}">
+					<span class="gantt-label" th:text="${task.title}"></span>
+					<div class="gantt-track">
+						<div class="gantt-bar"
+							th:classappend="${task.status == 'DONE'} ? 'is-done' : (${task.status == 'IN_PROGRESS'} ? 'is-progress' : 'is-risk')"
+							th:attr="data-start=${task.startDate}, data-end=${task.dueDate}">
+						</div>
+					</div>
+				</div>
+				<p class="empty-state" th:if="${#lists.isEmpty(tasks)}">表示できるタスクがありません</p>
+			</div>
+
+			<div class="panel" style="margin-top:24px;">
+				<div class="panel-head">
+					<h2>依存関係一覧</h2>
+				</div>
+				<ul class="milestone-list">
+					<li class="milestone-item" th:each="dep : ${dependencies}">
+						<div class="milestone-main">
+							<p class="milestone-title">
+								<span th:text="${dep.precedingTask.title}"></span>
+								<span> → </span>
+								<span th:text="${dep.succeedingTask.title}"></span>
+							</p>
+							<div class="milestone-meta">
+								<span th:text="'(' + ${dep.dependencyType} + ', lag ' + ${dep.lagDays} + '日)'"></span>
+							</div>
+						</div>
+					</li>
+				</ul>
+				<div class="empty-state" th:if="${#lists.isEmpty(dependencies)}">
+					<p>依存関係はありません</p>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+
+	<script>
+		// タスクの開始日・期限からバーの左位置・幅を計算する
+		(function () {
+			const bars = document.querySelectorAll('.gantt-bar');
+			if (bars.length === 0) return;
+
+			const dates = [];
+			bars.forEach(b => {
+				dates.push(new Date(b.dataset.start));
+				dates.push(new Date(b.dataset.end));
+			});
+			const minDate = new Date(Math.min(...dates));
+			const maxDate = new Date(Math.max(...dates));
+			const totalDays = Math.max(1, (maxDate - minDate) / (1000 * 60 * 60 * 24));
+
+			bars.forEach(b => {
+				const start = new Date(b.dataset.start);
+				const end = new Date(b.dataset.end);
+				const offsetDays = (start - minDate) / (1000 * 60 * 60 * 24);
+				const durationDays = Math.max(1, (end - start) / (1000 * 60 * 60 * 24));
+				b.style.setProperty('--bar-left', (offsetDays / totalDays * 100) + '%');
+				b.style.setProperty('--bar-width', (durationDays / totalDays * 100) + '%');
+			});
+		})();
+	</script>
+</body>
+
+</html>

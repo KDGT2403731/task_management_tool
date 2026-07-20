@@ -42,6 +42,14 @@ public class ProjectService {
 				.orElseThrow(() -> new IllegalArgumentException("プロジェクトが存在しません: " + projectId));
 	}
 
+	/**
+	 * ステータスが進行中(IN_PROGRESS)のプロジェクト数。管理者ダッシュボードのサマリー表示用。
+	 */
+	@Transactional(readOnly = true)
+	public long countActiveProjects() {
+		return projectRepository.countByStatus("IN_PROGRESS");
+	}
+
 	@Transactional
 	public Project createProject(String email, String name, String description, LocalDate startDate,
 			LocalDate endDate) {

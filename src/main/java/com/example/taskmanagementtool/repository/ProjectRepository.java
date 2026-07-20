@@ -12,4 +12,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
 	List<Project> findByTeamId(Long teamId);
 
 	List<Project> findByOwnerId(Long ownerId);
+
+	long countByStatus(String status);
 }

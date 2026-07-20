@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import com.example.taskmanagementtool.entity.Milestone;
 import com.example.taskmanagementtool.service.MilestoneService;
+import com.example.taskmanagementtool.service.ProjectService;
 import com.example.taskmanagementtool.service.TaskService;
 import com.example.taskmanagementtool.service.TeamService;
 import com.example.taskmanagementtool.service.UserService;
@@ -21,13 +22,15 @@ public class DashboardController {
 	private final TaskService taskService;
 	private final UserService userService;
 	private final TeamService teamService;
+	private final ProjectService projectService;
 
 	public DashboardController(MilestoneService milestoneService, TaskService taskService, UserService userService,
-			TeamService teamService) {
+			TeamService teamService, ProjectService projectService) {
 		this.milestoneService = milestoneService;
 		this.taskService = taskService;
 		this.userService = userService;
 		this.teamService = teamService;
+		this.projectService = projectService;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -57,6 +60,8 @@ public class DashboardController {
 		// admin/system と同じ集計値を、既存のUserService/TeamServiceからそのまま流用する
 		model.addAttribute("totalUsers", userService.countUsers());
 		model.addAttribute("totalTeams", teamService.countTeams());
+		// ステータスが進行中(IN_PROGRESS)のプロジェクト数
+		model.addAttribute("activeProjects", projectService.countActiveProjects());
 
 		return "admin/dashboard";
 	}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${user.name} + ' | 工程ノート'">ユーザー詳細 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/admin/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート 管理者</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/admin/users" class="btn btn-ghost">ユーザー一覧</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="banner banner-error" th:if="${deleteError}">
+				<span th:text="${deleteError}"></span>
+			</div>
+
+			<div class="detail-head">
+				<div>
+					<p class="eyebrow">User</p>
+					<h1 th:text="${user.name}">ユーザー名</h1>
+				</div>
+				<div class="detail-actions">
+					<form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post"
+						  onsubmit="return confirm('このユーザーを削除しますか？');">
+						<button type="submit" class="btn btn-danger">削除</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="detail-meta">
+				<div class="meta-item">
+					<span class="meta-label">メールアドレス</span>
+					<span th:text="${user.email}"></span>
+				</div>
+				<div class="meta-item">
+					<span class="meta-label">ロール</span>
+					<span th:text="${user.role}"></span>
+				</div>
+				<div class="meta-item">
+					<span class="meta-label">所属チーム</span>
+					<span th:text="${user.team != null ? user.team.name : '未所属'}"></span>
+				</div>
+				<div class="meta-item" th:if="${user.ssoProvider != null}">
+					<span class="meta-label">SSOプロバイダー</span>
+					<span th:text="${user.ssoProvider}"></span>
+				</div>
+			</div>
+
+			<!-- ===== ロール変更 ===== -->
+			<div class="form-card">
+				<div class="panel-head"><h2>ロールを変更</h2></div>
+				<form th:action="@{/admin/users/{id}/role(id=${user.id})}" method="post" class="form-row">
+					<div class="form-field">
+						<label for="role">ロール</label>
+						<select id="role" name="role">
+							<option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+									th:selected="${r == user.role}"></option>
+						</select>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">変更する</button>
+					</div>
+				</form>
+			</div>
+
+			<!-- ===== 所属チーム変更 ===== -->
+			<div class="form-card">
+				<div class="panel-head"><h2>所属チームを変更</h2></div>
+				<form th:action="@{/admin/users/{id}/team(id=${user.id})}" method="post" class="form-row">
+					<div class="form-field">
+						<label for="teamId">チーム</label>
+						<select id="teamId" name="teamId">
+							<option value="">未所属にする</option>
+							<option th:each="t : ${teams}" th:value="${t.id}" th:text="${t.name}"
+									th:selected="${user.team != null and user.team.id == t.id}"></option>
+						</select>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">変更する</button>
+					</div>
+				</form>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+
+</body>
+
+</html>

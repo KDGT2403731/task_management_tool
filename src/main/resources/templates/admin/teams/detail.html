@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${team.name} + ' | 工程ノート'">チーム詳細 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/admin/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート 管理者</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/admin/teams" class="btn btn-ghost">チーム一覧</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="banner banner-error" th:if="${deleteError}">
+				<span th:text="${deleteError}"></span>
+			</div>
+
+			<div class="detail-head">
+				<div>
+					<p class="eyebrow">Team</p>
+					<h1 th:text="${team.name}">チーム名</h1>
+				</div>
+				<div class="detail-actions">
+					<form th:action="@{/admin/teams/{id}/delete(id=${team.id})}" method="post"
+						  onsubmit="return confirm('このチームを削除しますか？');">
+						<button type="submit" class="btn btn-danger">削除</button>
+					</form>
+				</div>
+			</div>
+
+			<div class="detail-meta">
+				<div class="meta-item">
+					<span class="meta-label">メンバー数</span>
+					<span th:text="${members != null ? #lists.size(members) : 0}"></span>
+				</div>
+				<div class="meta-item">
+					<span class="meta-label">プロジェクト数</span>
+					<span th:text="${team.projects != null ? #lists.size(team.projects) : 0}"></span>
+				</div>
+			</div>
+
+			<div class="panel">
+				<div class="panel-head"><h2>メンバー</h2></div>
+
+				<ul class="milestone-list" th:if="${members != null and !#lists.isEmpty(members)}">
+					<li class="milestone-item" th:each="member : ${members}">
+						<div class="milestone-main">
+							<p class="milestone-title">
+								<a th:href="@{/admin/users/{id}(id=${member.id})}" th:text="${member.name}"
+								   style="text-decoration:none; color:inherit;"></a>
+							</p>
+							<div class="milestone-meta">
+								<span th:text="${member.email}"></span>
+							</div>
+						</div>
+						<span th:text="${member.role}"></span>
+					</li>
+				</ul>
+
+				<div class="empty-state" th:if="${members == null or #lists.isEmpty(members)}">
+					<p>このチームにはまだメンバーがいません。</p>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+
+</body>
+
+</html>

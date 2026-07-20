@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${project.name} + ' マイルストーン | 工程ノート'">マイルストーン | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクト詳細</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-header">
+				<div>
+					<p class="eyebrow" th:text="${project.name}">プロジェクト名</p>
+					<h1>マイルストーン</h1>
+				</div>
+				<a th:href="@{/projects/{projectId}/milestones/create(projectId=${projectId})}"
+					class="btn btn-primary">＋ 新しいマイルストーン</a>
+			</div>
+
+			<div class="panel">
+				<ul class="milestone-list" th:if="${milestones != null and !#lists.isEmpty(milestones)}">
+					<li class="milestone-item" th:each="milestone : ${milestones}">
+						<div class="milestone-main">
+							<p class="milestone-title">
+								<a th:href="@{/projects/{projectId}/milestones/{id}(projectId=${projectId}, id=${milestone.id})}"
+									th:text="${milestone.title}" style="text-decoration:none; color:inherit;"></a>
+							</p>
+							<div class="milestone-meta">
+								<span th:if="${milestone.targetDate != null}"
+									th:text="${#temporals.format(milestone.targetDate, 'yyyy/MM/dd')}"></span>
+								<span th:unless="${milestone.targetDate != null}">目標日未設定</span>
+							</div>
+						</div>
+						<span th:class="${'status-badge ' +
+							(milestone.status == 'ACHIEVED' ? 'status-achieved' :
+							(milestone.status == 'MISSED' ? 'status-missed' : 'status-open'))}" th:text="${milestone.status}"></span>
+					</li>
+				</ul>
+
+				<div class="empty-state" th:if="${milestones == null or #lists.isEmpty(milestones)}">
+					<p>マイルストーンはまだ登録されていません。</p>
+					<a th:href="@{/projects/{projectId}/milestones/create(projectId=${projectId})}"
+						class="btn btn-primary">最初のマイルストーンを作る</a>
+				</div>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+			<nav class="foot-links">
+				<a href="/dashboard">ダッシュボード</a>
+				<a href="/projects">プロジェクト</a>
+			</nav>
+		</div>
+	</footer>
+
+</body>
+
+</html>

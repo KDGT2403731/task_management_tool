@@ -147,9 +147,10 @@ public class ProjectController {
 			@RequestParam("title") String title,
 			@RequestParam(value = "targetDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
-			@RequestParam(value = "description", required = false) String description) {
+			@RequestParam(value = "description", required = false) String description,
+			@RequestParam(value = "status", required = false) String status) {
 
-		milestoneService.updateMilestone(projectId, milestoneId, title, targetDate, description);
+		milestoneService.updateMilestone(projectId, milestoneId, title, targetDate, description, status);
 		return "redirect:/projects/" + projectId + "/milestones/" + milestoneId;
 	}
 

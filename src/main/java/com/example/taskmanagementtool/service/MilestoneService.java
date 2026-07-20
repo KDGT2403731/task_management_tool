@@ -50,11 +50,18 @@ public class MilestoneService {
 
 	@Transactional
 	public Milestone updateMilestone(Long projectId, Long milestoneId, String title, LocalDate targetDate,
-			String description) {
+			String description, String status) {
 		Milestone milestone = findMilestoneInProject(projectId, milestoneId);
 		milestone.setTitle(title);
 		milestone.setTargetDate(targetDate);
 		milestone.setDescription(description);
+		// statusが未指定（空欄）の場合は既存値を維持する
+		if (status != null && !status.isBlank()) {
+			if (!VALID_STATUSES.contains(status)) {
+				throw new IllegalArgumentException("不正なステータスです: " + status);
+			}
+			milestone.setStatus(status);
+		}
 		return milestoneRepository.save(milestone);
 	}
 

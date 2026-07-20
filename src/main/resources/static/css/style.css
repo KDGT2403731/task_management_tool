@@ -1483,3 +1483,14 @@ section h2 {
 .hours-nums strong {
 	color: var(--color-ink);
 }
+
+.gantt-card .gantt-row {
+	grid-template-columns: 220px 1fr;
+}
+
+.gantt-card .gantt-bar {
+	transform: none;
+	animation: none;
+	left: var(--bar-left, 0);
+	width: var(--bar-width, 10%);
+}

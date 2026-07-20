@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ガントチャート（閲覧専用） | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/guest/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート ゲスト</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/guest/dashboard" class="btn btn-ghost">ダッシュボードへ戻る</a>
+				<a href="/guest/tasks" class="btn btn-ghost">タスク一覧</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-header">
+				<div>
+					<p class="eyebrow">Read only</p>
+					<h1>ガントチャート</h1>
+				</div>
+			</div>
+
+			<div class="gantt-card" id="gantt-container">
+				<div class="gantt-row" th:each="task : ${tasks}" th:if="${task.startDate != null and task.dueDate != null}">
+					<span class="gantt-label"
+						  th:text="(${task.project != null ? task.project.name + ' / ' : ''}) + ${task.title}"></span>
+					<div class="gantt-track">
+						<div class="gantt-bar"
+							 th:classappend="${task.status == 'DONE'} ? 'is-done' : (${task.status == 'IN_PROGRESS'} ? 'is-progress' : 'is-risk')"
+							 th:attr="data-start=${task.startDate}, data-end=${task.dueDate}">
+						</div>
+					</div>
+				</div>
+				<p class="empty-state" th:if="${#lists.isEmpty(tasks)}">表示できるタスクがありません</p>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+
+	<script>
+		(function () {
+			const bars = document.querySelectorAll('.gantt-bar');
+			if (bars.length === 0) return;
+
+			const dates = [];
+			bars.forEach(b => {
+				dates.push(new Date(b.dataset.start));
+				dates.push(new Date(b.dataset.end));
+			});
+			const minDate = new Date(Math.min(...dates));
+			const maxDate = new Date(Math.max(...dates));
+			const totalDays = Math.max(1, (maxDate - minDate) / (1000 * 60 * 60 * 24));
+
+			bars.forEach(b => {
+				const start = new Date(b.dataset.start);
+				const end = new Date(b.dataset.end);
+				const offsetDays = (start - minDate) / (1000 * 60 * 60 * 24);
+				const durationDays = Math.max(1, (end - start) / (1000 * 60 * 60 * 24));
+				b.style.setProperty('--bar-left', (offsetDays / totalDays * 100) + '%');
+				b.style.setProperty('--bar-width', (durationDays / totalDays * 100) + '%');
+			});
+		})();
+	</script>
+
+</body>
+
+</html>

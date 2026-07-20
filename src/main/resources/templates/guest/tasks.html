@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>タスク一覧（閲覧専用） | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/guest/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート ゲスト</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/guest/dashboard" class="btn btn-ghost">ダッシュボードへ戻る</a>
+				<a href="/guest/tasks/gantt" class="btn btn-ghost">ガントチャート</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-header">
+				<div>
+					<p class="eyebrow">Read only</p>
+					<h1>タスク一覧</h1>
+				</div>
+			</div>
+
+			<div class="kanban-board">
+
+				<!-- 未着手 -->
+				<section class="kanban-column">
+					<div class="kanban-column-head">
+						<h2>未着手</h2>
+						<span class="kanban-count" th:text="${tasks.?[status == 'TODO'].size()}">0</span>
+					</div>
+					<div class="kanban-cards">
+						<div class="kanban-card" th:each="task : ${tasks}" th:if="${task.status == 'TODO'}" style="cursor:default;">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
+							<div class="kanban-card-meta">
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
+							</div>
+							<div class="kanban-card-assignee"
+								 th:text="(${task.project != null ? task.project.name : ''}) + ' / ' + (${task.assignee != null ? task.assignee.name : '未アサイン'})"></div>
+						</div>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'TODO'].isEmpty()}">タスクはありません</p>
+					</div>
+				</section>
+
+				<!-- 進行中 -->
+				<section class="kanban-column">
+					<div class="kanban-column-head">
+						<h2>進行中</h2>
+						<span class="kanban-count" th:text="${tasks.?[status == 'IN_PROGRESS'].size()}">0</span>
+					</div>
+					<div class="kanban-cards">
+						<div class="kanban-card" th:each="task : ${tasks}" th:if="${task.status == 'IN_PROGRESS'}" style="cursor:default;">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
+							<div class="kanban-card-meta">
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
+							</div>
+							<div class="kanban-card-assignee"
+								 th:text="(${task.project != null ? task.project.name : ''}) + ' / ' + (${task.assignee != null ? task.assignee.name : '未アサイン'})"></div>
+						</div>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'IN_PROGRESS'].isEmpty()}">タスクはありません</p>
+					</div>
+				</section>
+
+				<!-- 完了 -->
+				<section class="kanban-column">
+					<div class="kanban-column-head">
+						<h2>完了</h2>
+						<span class="kanban-count" th:text="${tasks.?[status == 'DONE'].size()}">0</span>
+					</div>
+					<div class="kanban-cards">
+						<div class="kanban-card" th:each="task : ${tasks}" th:if="${task.status == 'DONE'}" style="cursor:default;">
+							<p class="kanban-card-title" th:text="${task.title}"></p>
+							<div class="kanban-card-meta">
+								<span class="kanban-card-due" th:text="${task.dueDate}"></span>
+								<span class="priority-badge"
+									  th:classappend="${task.priority == 'HIGH'} ? 'priority-high' : (${task.priority == 'LOW'} ? 'priority-low' : 'priority-medium')"
+									  th:text="${task.priority}"></span>
+							</div>
+							<div class="kanban-card-assignee"
+								 th:text="(${task.project != null ? task.project.name : ''}) + ' / ' + (${task.assignee != null ? task.assignee.name : '未アサイン'})"></div>
+						</div>
+						<p class="kanban-empty" th:if="${tasks.?[status == 'DONE'].isEmpty()}">タスクはありません</p>
+					</div>
+				</section>
+
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+
+</body>
+
+</html>

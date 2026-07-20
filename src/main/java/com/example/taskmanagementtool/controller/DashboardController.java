@@ -11,16 +11,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.example.taskmanagementtool.entity.Milestone;
 import com.example.taskmanagementtool.service.MilestoneService;
 import com.example.taskmanagementtool.service.TaskService;
+import com.example.taskmanagementtool.service.TeamService;
+import com.example.taskmanagementtool.service.UserService;
 
 @Controller
 public class DashboardController {
 
 	private final MilestoneService milestoneService;
 	private final TaskService taskService;
+	private final UserService userService;
+	private final TeamService teamService;
 
-	public DashboardController(MilestoneService milestoneService, TaskService taskService) {
+	public DashboardController(MilestoneService milestoneService, TaskService taskService, UserService userService,
+			TeamService teamService) {
 		this.milestoneService = milestoneService;
 		this.taskService = taskService;
+		this.userService = userService;
+		this.teamService = teamService;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -47,8 +54,9 @@ public class DashboardController {
 			model.addAttribute("username", userDetails.getUsername());
 		}
 
-		// model.addAttribute("totalUsers", userService.countAllUsers());
-		// model.addAttribute("activeProjects", projectService.countActiveProjects());
+		// admin/system と同じ集計値を、既存のUserService/TeamServiceからそのまま流用する
+		model.addAttribute("totalUsers", userService.countUsers());
+		model.addAttribute("totalTeams", teamService.countTeams());
 
 		return "admin/dashboard";
 	}
@@ -56,10 +64,13 @@ public class DashboardController {
 	@GetMapping("/guest/dashboard")
 	public String guestDashboard(@AuthenticationPrincipal UserDetails userDetails, Model model) {
 		if (userDetails != null) {
-			model.addAttribute("username", userDetails.getUsername());
-		}
+			String username = userDetails.getUsername();
+			model.addAttribute("username", username);
 
-		// model.addAttribute("sharedTasks", taskService.getSharedTasksForGuest(userDetails.getUsername()));
+			// ゲストに紐づくタスクの件数だけをダッシュボードのサマリーとして表示する
+			// （一覧そのものは/guest/tasksで確認するため、ここでは件数のみ）
+			model.addAttribute("sharedTaskCount", taskService.listTasksForUser(username).size());
+		}
 
 		return "guest/dashboard";
 	}

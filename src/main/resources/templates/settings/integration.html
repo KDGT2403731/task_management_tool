@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>外部連携設定 | 工程ノート</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
+		rel="stylesheet">
+	<link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+	<header class="site-header">
+		<div class="container">
+			<a href="/dashboard" class="brand">
+				<span class="brand-mark">Kotei</span>
+				<span class="brand-sub">工程ノート</span>
+			</a>
+			<nav class="nav-actions">
+				<a href="/dashboard" class="btn btn-ghost">ダッシュボードへ戻る</a>
+			</nav>
+		</div>
+	</header>
+
+	<main class="app-main">
+		<div class="container">
+
+			<div class="page-head">
+				<div>
+					<p class="section-eyebrow">Settings</p>
+					<h1>外部連携設定</h1>
+				</div>
+			</div>
+
+			<!-- ===== フラッシュメッセージ ===== -->
+			<div class="banner banner-error" th:if="${connectError}" th:text="${connectError}"></div>
+			<div class="banner banner-error" th:if="${disconnectError}" th:text="${disconnectError}"></div>
+
+			<!-- ===== サービスごとのカード ===== -->
+			<div th:each="service : ${services}" th:with="matches=${integrations.?[serviceName == service]}">
+
+				<!-- 接続済み -->
+				<div class="integration-card" th:if="${!matches.isEmpty()}" th:with="integration=${matches[0]}">
+					<div>
+						<h2 th:text="${service}">SLACK</h2>
+						<p>
+							接続済み
+							<span th:if="${integration.apiEndpoint != null and !integration.apiEndpoint.isBlank()}"
+								th:text="'（' + ${integration.apiEndpoint} + '）'"></span>
+						</p>
+						<p th:if="${integration.expiresAt != null}" th:text="'トークン有効期限: ' + ${integration.expiresAt}">
+						</p>
+					</div>
+					<form th:action="@{/settings/integration/{id}/disconnect(id=${integration.id})}" method="post"
+						onsubmit="return confirm('連携を解除しますか？');">
+						<button type="submit" class="btn btn-danger">連携解除</button>
+					</form>
+				</div>
+
+				<!-- 未接続 -->
+				<div class="integration-card" th:if="${matches.isEmpty()}" style="align-items: flex-start;">
+					<div style="flex: 1; min-width: 0;">
+						<h2 th:text="${service}">SLACK</h2>
+						<p>まだ接続されていません。</p>
+
+						<form class="form-card" style="margin-top: 16px; max-width: 480px; padding: 20px;"
+							th:action="@{/settings/integration/{serviceName}/connect(serviceName=${service})}"
+							method="post">
+
+							<div class="form-field" th:if="${service == 'GOOGLE_CALENDAR'}">
+								<label>APIエンドポイント</label>
+								<input type="text" name="apiEndpoint"
+									placeholder="https://www.googleapis.com/calendar/v3">
+							</div>
+							<div class="form-field" th:unless="${service == 'GOOGLE_CALENDAR'}">
+								<label>Webhook URL / APIエンドポイント</label>
+								<input type="text" name="apiEndpoint"
+									placeholder="https://hooks.slack.com/services/...">
+							</div>
+
+							<div class="form-field">
+								<label>アクセストークン</label>
+								<input type="password" name="accessToken" autocomplete="off">
+							</div>
+
+							<div class="form-field">
+								<label>リフレッシュトークン（任意）</label>
+								<input type="password" name="refreshToken" autocomplete="off">
+							</div>
+
+							<div class="form-field">
+								<label>トークン有効期限（任意）</label>
+								<input type="datetime-local" name="expiresAt">
+							</div>
+
+							<div class="form-actions">
+								<button type="submit" class="btn btn-primary">接続する</button>
+							</div>
+						</form>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="empty-state" th:if="${#lists.isEmpty(services)}">
+				<p>連携可能な外部サービスがありません</p>
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="site-footer">
+		<div class="container">
+			<p>&copy; 2026 工程ノート</p>
+		</div>
+	</footer>
+</body>
+
+</html>

@@ -17,4 +17,7 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
 	// 特定のマイルストーンに紐づくタスクを一覧取得 
 	List<Task> findByMilestoneId(Long milestoneId);
+
+	// 特定のユーザーが作成したタスクを一覧取得（ユーザー削除時のFK整合性チェック用）
+	List<Task> findByCreatedById(Long createdById);
 }

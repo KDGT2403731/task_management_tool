@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taskmanagementtool.entity.Team;
 import com.example.taskmanagementtool.entity.User;
+import com.example.taskmanagementtool.repository.ProjectRepository;
+import com.example.taskmanagementtool.repository.TaskRepository;
 import com.example.taskmanagementtool.repository.TeamRepository;
 import com.example.taskmanagementtool.repository.UserRepository;
 
@@ -16,10 +18,15 @@ public class UserService {
 
 	private final UserRepository userRepository;
 	private final TeamRepository teamRepository;
+	private final ProjectRepository projectRepository;
+	private final TaskRepository taskRepository;
 
-	public UserService(UserRepository userRepository, TeamRepository teamRepository) {
+	public UserService(UserRepository userRepository, TeamRepository teamRepository,
+			ProjectRepository projectRepository, TaskRepository taskRepository) {
 		this.userRepository = userRepository;
 		this.teamRepository = teamRepository;
+		this.projectRepository = projectRepository;
+		this.taskRepository = taskRepository;
 	}
 
 	@Transactional(readOnly = true)
@@ -68,6 +75,21 @@ public class UserService {
 
 		if (currentUser.getId().equals(id)) {
 			throw new IllegalStateException("自分自身のアカウントは削除できません。");
+		}
+
+		// Project.ownerはnullable = falseのため、オーナーになっているプロジェクトが
+		// 残っている状態で削除するとFK制約違反になる。事前にチェックして分かりやすいエラーにする。
+		int ownedProjectCount = projectRepository.findByOwnerId(id).size();
+		if (ownedProjectCount > 0) {
+			throw new IllegalStateException(
+					"このユーザーは" + ownedProjectCount + "件のプロジェクトのオーナーになっているため削除できません。先にオーナーを移管してください。");
+		}
+
+		// Task.createdByもnullable = falseのため、作成したタスクが残っていると同様にFK制約違反になる。
+		int createdTaskCount = taskRepository.findByCreatedById(id).size();
+		if (createdTaskCount > 0) {
+			throw new IllegalStateException(
+					"このユーザーは" + createdTaskCount + "件のタスクの作成者になっているため削除できません。先にタスクの作成者を変更するか、タスクを削除してください。");
 		}
 
 		userRepository.deleteById(id);

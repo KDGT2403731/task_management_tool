@@ -10,7 +10,7 @@ import com.example.taskmanagementtool.entity.Integration;
 
 @Repository
 public interface IntegrationRepository extends JpaRepository<Integration, Long> {
-	List<Integration> findByUserId(Long userId); // ユーザーの連携一覧取得用
+	List<Integration> findByUserId(Long userId);
 
 	Optional<Integration> findByUserIdAndServiceName(Long userId, String serviceName);
 }

@@ -22,7 +22,8 @@
 				<span class="brand-sub">工程ノート</span>
 			</a>
 			<nav class="nav-actions">
-				<a th:href="@{/projects/{projectId}/milestones/{id}(projectId=${projectId}, id=${milestone.id})}" class="btn btn-ghost">マイルストーン詳細</a>
+				<a th:href="@{/projects/{projectId}/milestones/{id}(projectId=${projectId}, id=${milestone.id})}"
+					class="btn btn-ghost">マイルストーン詳細</a>
 				<form class="logout-form" th:action="@{/logout}" method="post">
 					<button type="submit" class="btn btn-ghost">ログアウト</button>
 				</form>
@@ -41,10 +42,13 @@
 			</div>
 
 			<div class="form-card">
-				<form th:action="@{/projects/{projectId}/milestones/{id}/edit(projectId=${projectId}, id=${milestone.id})}" method="post">
+				<form
+					th:action="@{/projects/{projectId}/milestones/{id}/edit(projectId=${projectId}, id=${milestone.id})}"
+					method="post">
 					<div class="form-field">
 						<label for="title">タイトル</label>
-						<input type="text" id="title" name="title" th:value="${milestone.title}" required autofocus maxlength="255">
+						<input type="text" id="title" name="title" th:value="${milestone.title}" required autofocus
+							maxlength="255">
 					</div>
 					<div class="form-field">
 						<label for="targetDate">目標日</label>
@@ -58,13 +62,14 @@
 						<label for="status">ステータス</label>
 						<select id="status" name="status">
 							<option th:each="s : ${statuses}" th:value="${s}"
-									th:text="${s == 'ACHIEVED'} ? '達成' : (${s == 'MISSED'} ? '見送り' : '未達成')"
-									th:selected="${s == milestone.status}"></option>
+								th:text="${s == 'ACHIEVED'} ? '達成' : (${s == 'MISSED'} ? '見送り' : '未達成')"
+								th:selected="${s == milestone.status}"></option>
 						</select>
 					</div>
 					<div class="form-actions">
 						<button type="submit" class="btn btn-primary">保存する</button>
-						<a th:href="@{/projects/{projectId}/milestones/{id}(projectId=${projectId}, id=${milestone.id})}" class="btn btn-ghost">キャンセル</a>
+						<a th:href="@{/projects/{projectId}/milestones/{id}(projectId=${projectId}, id=${milestone.id})}"
+							class="btn btn-ghost">キャンセル</a>
 					</div>
 				</form>
 			</div>

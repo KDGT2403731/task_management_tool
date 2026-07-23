@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
 		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
 	<header class="site-header">
@@ -78,16 +80,19 @@
 						<div class="hours-bars">
 							<div class="hours-bar-track">
 								<div class="hours-bar-fill plan"
-									 th:style="'width:' + (${maxHours} == 0 ? 0 : (${s.planHoursTotal} * 100 / ${maxHours})) + '%'"></div>
+									th:style="'width:' + (${maxHours} == 0 ? 0 : (${s.planHoursTotal} * 100 / ${maxHours})) + '%'">
+								</div>
 							</div>
 							<div class="hours-bar-track">
 								<div class="hours-bar-fill actual"
-									 th:style="'width:' + (${maxHours} == 0 ? 0 : (${s.actualHoursTotal} * 100 / ${maxHours})) + '%'"></div>
+									th:style="'width:' + (${maxHours} == 0 ? 0 : (${s.actualHoursTotal} * 100 / ${maxHours})) + '%'">
+								</div>
 							</div>
 						</div>
 
 						<div class="hours-nums">
-							<div><strong th:text="${s.planHoursTotal}"></strong>h 見積 / <strong th:text="${s.actualHoursTotal}"></strong>h 実績</div>
+							<div><strong th:text="${s.planHoursTotal}"></strong>h 見積 / <strong
+									th:text="${s.actualHoursTotal}"></strong>h 実績</div>
 							<div th:text="${s.taskCount} + '件のタスク'"></div>
 						</div>
 					</div>
@@ -111,4 +116,5 @@
 		</div>
 	</footer>
 </body>
+
 </html>

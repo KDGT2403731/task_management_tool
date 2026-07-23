@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,6 +12,7 @@
 		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
 	<header class="site-header">
@@ -21,6 +23,9 @@
 			</a>
 			<nav class="nav-actions">
 				<a href="/dashboard" class="btn btn-ghost">ダッシュボードへ戻る</a>
+				<form class="logout-form" th:action="@{/logout}" method="post">
+					<button type="submit" class="btn btn-ghost">ログアウト</button>
+				</form>
 			</nav>
 		</div>
 	</header>
@@ -40,8 +45,7 @@
 			<div class="banner banner-error" th:if="${disconnectError}" th:text="${disconnectError}"></div>
 
 			<!-- ===== サービスごとのカード ===== -->
-			<div th:each="service : ${services}"
-				 th:with="matches=${integrations.?[serviceName == service]}">
+			<div th:each="service : ${services}" th:with="matches=${integrations.?[serviceName == service]}">
 
 				<!-- 接続済み -->
 				<div class="integration-card" th:if="${!matches.isEmpty()}" th:with="integration=${matches[0]}">
@@ -55,13 +59,13 @@
 						<p>
 							接続済み
 							<span th:if="${integration.apiEndpoint != null and !integration.apiEndpoint.isBlank()}"
-								  th:text="'（' + ${integration.apiEndpoint} + '）'"></span>
+								th:text="'（' + ${integration.apiEndpoint} + '）'"></span>
 						</p>
-						<p th:if="${integration.expiresAt != null}"
-						   th:text="'トークン有効期限: ' + ${integration.expiresAt}"></p>
+						<p th:if="${integration.expiresAt != null}" th:text="'トークン有効期限: ' + ${integration.expiresAt}">
+						</p>
 					</div>
-					<form th:action="@{/settings/integration/{id}/disconnect(id=${integration.id})}"
-						  method="post" onsubmit="return confirm('連携を解除しますか？');">
+					<form th:action="@{/settings/integration/{id}/disconnect(id=${integration.id})}" method="post"
+						onsubmit="return confirm('連携を解除しますか？');">
 						<button type="submit" class="btn btn-danger">連携解除</button>
 					</form>
 				</div>
@@ -78,16 +82,18 @@
 						<p>まだ接続されていません。</p>
 
 						<form class="form-card" style="margin-top: 16px; max-width: 480px; padding: 20px;"
-							  th:action="@{/settings/integration/{serviceName}/connect(serviceName=${service})}"
-							  method="post">
+							th:action="@{/settings/integration/{serviceName}/connect(serviceName=${service})}"
+							method="post">
 
 							<div class="form-field" th:if="${service == 'GOOGLE_CALENDAR'}">
 								<label>APIエンドポイント</label>
-								<input type="text" name="apiEndpoint" placeholder="https://www.googleapis.com/calendar/v3">
+								<input type="text" name="apiEndpoint"
+									placeholder="https://www.googleapis.com/calendar/v3">
 							</div>
 							<div class="form-field" th:unless="${service == 'GOOGLE_CALENDAR'}">
 								<label>Webhook URL / APIエンドポイント</label>
-								<input type="text" name="apiEndpoint" placeholder="https://hooks.slack.com/services/...">
+								<input type="text" name="apiEndpoint"
+									placeholder="https://hooks.slack.com/services/...">
 							</div>
 
 							<div class="form-field">
@@ -127,4 +133,5 @@
 		</div>
 	</footer>
 </body>
+
 </html>

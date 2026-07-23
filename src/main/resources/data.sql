@@ -1,6 +1,6 @@
 INSERT INTO users (id, name, email, password_hash, role)
 VALUES
-(1, '田中博', 'tanakahiro@gmail.com', '$2a$10$40C4GZVBYvSJd44jK.SYnuP1rEbVABm5dfS8/c6zWzPNutepiNaSS', 'ADMIN'),
+(1, '田中博司', 'tanakahiro@gmail.com', '$2a$10$40C4GZVBYvSJd44jK.SYnuP1rEbVABm5dfS8/c6zWzPNutepiNaSS', 'ADMIN'),
 (2, '鈴木太郎', 'tarosuzuki@gmail.com', '$2a$10$s530/bQG1WUmOQMmmUqECeaowzNUkqVF1g3V3LDZU34SSkW5mPnTq', 'MEMBER'),
 (3, '山田花子', 'hanakoyama@gmail.com', '$2a$10$1ijVGK5Gufw6J3FRgaoG.een8WaJi2FwgluCZxyfCaWUhL54w.wOi', 'GUEST');
  

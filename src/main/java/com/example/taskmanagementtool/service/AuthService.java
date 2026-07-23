@@ -6,7 +6,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.taskmanagementtool.entity.Team;
 import com.example.taskmanagementtool.entity.User;
+import com.example.taskmanagementtool.repository.TeamRepository;
 import com.example.taskmanagementtool.repository.UserRepository;
 
 @Service
@@ -15,10 +17,13 @@ public class AuthService {
 	private static final List<String> ALLOWED_SIGNUP_ROLES = List.of("MEMBER", "GUEST");
 
 	private final UserRepository userRepository;
+	private final TeamRepository teamRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public AuthService(UserRepository userRepository, TeamRepository teamRepository,
+			PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
+		this.teamRepository = teamRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 
@@ -35,6 +40,17 @@ public class AuthService {
 		user.setEmail(email);
 		user.setPasswordHash(passwordEncoder.encode(rawPassword));
 		user.setRole(resolvedRole);
+
+		// MEMBERはプロジェクトを作成するのにチームが必須（ProjectService.createProject）。
+		// サインアップ直後は管理者にチームへ入れてもらうまで何も作れなくなってしまうため、
+		// 本人専用のチームを自動作成して割り当てておく。
+		// 後から管理者が既存チームへ付け替えることもできる（/admin/users/{id}/team）。
+		if ("MEMBER".equals(resolvedRole)) {
+			Team personalTeam = new Team();
+			personalTeam.setName(name + "のチーム");
+			teamRepository.save(personalTeam);
+			user.setTeam(personalTeam);
+		}
 
 		return userRepository.save(user);
 	}

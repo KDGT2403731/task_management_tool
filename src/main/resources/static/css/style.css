@@ -1012,6 +1012,17 @@ section h2 {
 	font-size: 0.85rem;
 }
 
+.gantt-card .gantt-row {
+	grid-template-columns: 160px 1fr;
+}
+
+.gantt-card .gantt-bar {
+	transform: none;
+	animation: none;
+	left: var(--bar-left, 0);
+	width: var(--bar-width, 10%);
+}
+
 .detail-meta .meta-label {
 	display: block;
 	font-family: var(--font-mono);

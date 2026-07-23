@@ -13,11 +13,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Entity
 @Table(name = "teams")
-@Data
+@Getter
+@Setter
+@ToString(exclude = { "teamMembers", "projects" })
 public class Team {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,4 +38,20 @@ public class Team {
 	// チームに紐づくプロジェクトたち（OneToMany）
 	@OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Project> projects;
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (!(o instanceof Team other)) {
+			return false;
+		}
+		return id != null && id.equals(other.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return getClass().hashCode();
+	}
 }

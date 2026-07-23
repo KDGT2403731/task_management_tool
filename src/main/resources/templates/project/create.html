@@ -41,23 +41,27 @@
 			</div>
 
 			<div class="form-card">
+				<div class="banner banner-error" th:if="${createError}">
+					<span th:text="${createError}"></span>
+				</div>
+
 				<form th:action="@{/projects/create}" method="post">
 					<div class="form-field">
 						<label for="name">プロジェクト名</label>
-						<input type="text" id="name" name="name" required autofocus>
+						<input type="text" id="name" name="name" th:value="${name}" required autofocus>
 					</div>
 					<div class="form-field">
 						<label for="description">説明</label>
-						<textarea id="description" name="description"></textarea>
+						<textarea id="description" name="description" th:text="${description}"></textarea>
 					</div>
 					<div class="form-row">
 						<div class="form-field">
 							<label for="startDate">開始日</label>
-							<input type="date" id="startDate" name="startDate">
+							<input type="date" id="startDate" name="startDate" th:value="${startDate}">
 						</div>
 						<div class="form-field">
 							<label for="endDate">終了予定日</label>
-							<input type="date" id="endDate" name="endDate">
+							<input type="date" id="endDate" name="endDate" th:value="${endDate}">
 						</div>
 					</div>
 					<div class="form-actions">

@@ -60,10 +60,21 @@ public class ProjectController {
 			@RequestParam(value = "startDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(value = "endDate", required = false)
-			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+			RedirectAttributes redirectAttributes) {
 
-		projectService.createProject(userDetails.getUsername(), name, description, startDate, endDate);
-		return "redirect:/projects";
+		try {
+			projectService.createProject(userDetails.getUsername(), name, description, startDate, endDate);
+			return "redirect:/projects";
+		} catch (IllegalStateException e) {
+			// チーム未所属など、業務ルール違反で作成できなかった場合はフォームに戻してエラー表示する
+			redirectAttributes.addFlashAttribute("createError", e.getMessage());
+			redirectAttributes.addFlashAttribute("name", name);
+			redirectAttributes.addFlashAttribute("description", description);
+			redirectAttributes.addFlashAttribute("startDate", startDate);
+			redirectAttributes.addFlashAttribute("endDate", endDate);
+			return "redirect:/projects/create";
+		}
 	}
 
 	@GetMapping("/{id}/edit")

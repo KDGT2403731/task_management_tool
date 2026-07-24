@@ -51,7 +51,7 @@
 								   style="text-decoration:none; color:inherit;"></a>
 							</p>
 							<div class="milestone-meta">
-								<span th:text="(${team.teamMembers != null ? #sets.size(team.teamMembers) : 0}) + '人のメンバー'"></span>
+								<span th:text="(${memberCounts.get(team.id)} ?: 0) + '人のメンバー'"></span>
 								<span th:text="(${team.projects != null ? #lists.size(team.projects) : 0}) + '件のプロジェクト'"></span>
 							</div>
 						</div>

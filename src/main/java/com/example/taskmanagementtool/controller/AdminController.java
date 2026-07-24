@@ -1,5 +1,8 @@
 package com.example.taskmanagementtool.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -74,7 +77,15 @@ public class AdminController {
 
 	@GetMapping("/teams")
 	public String listTeams(Model model) {
-		model.addAttribute("teams", teamService.listAllTeams());
+		var teams = teamService.listAllTeams();
+		model.addAttribute("teams", teams);
+
+		Map<Long, Integer> memberCounts = new HashMap<>();
+		for (Team team : teams) {
+			memberCounts.put(team.getId(), teamService.findTeamMembers(team.getId()).size());
+		}
+		model.addAttribute("memberCounts", memberCounts);
+
 		return "admin/teams/list";
 	}
 

@@ -71,9 +71,7 @@
 					</div>
 				</div>
 
-				<div th:with="maxPlan=${#aggregates.max(summaries.![planHoursTotal])} ?: 0,
-							  maxActual=${#aggregates.max(summaries.![actualHoursTotal])} ?: 0,
-							  maxHours=${maxPlan > maxActual ? maxPlan : maxActual}">
+				<div>
 					<div class="hours-row" th:each="s : ${summaries}">
 						<span class="hours-name" th:text="${s.assigneeName}"></span>
 

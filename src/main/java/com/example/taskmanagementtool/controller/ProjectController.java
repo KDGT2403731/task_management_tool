@@ -17,18 +17,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.taskmanagementtool.entity.Milestone;
 import com.example.taskmanagementtool.entity.Project;
+import com.example.taskmanagementtool.entity.User;
 import com.example.taskmanagementtool.service.MilestoneService;
 import com.example.taskmanagementtool.service.ProjectService;
+import com.example.taskmanagementtool.service.TeamService;
 
 @Controller
 @RequestMapping("/projects")
 public class ProjectController {
 	private final ProjectService projectService;
 	private final MilestoneService milestoneService;
+	private final TeamService teamService;
 
-	public ProjectController(ProjectService projectService, MilestoneService milestoneService) {
+	public ProjectController(ProjectService projectService, MilestoneService milestoneService,
+			TeamService teamService) {
 		this.projectService = projectService;
 		this.milestoneService = milestoneService;
+		this.teamService = teamService;
 	}
 
 	// ========== プロジェクト ==========
@@ -42,8 +47,19 @@ public class ProjectController {
 
 	@GetMapping("/{id}")
 	public String projectDetail(@PathVariable("id") Long id, Model model) {
-		model.addAttribute("project", projectService.getProjectById(id));
+		Project project = projectService.getProjectById(id);
+		model.addAttribute("project", project);
 		model.addAttribute("projectId", id);
+
+		// メンバー管理パネル用: 同じチームに所属していて、まだこのプロジェクトのメンバーになっていないユーザー一覧
+		if (project.getTeam() != null) {
+			List<User> teamMembers = teamService.findTeamMembers(project.getTeam().getId());
+			List<User> addableUsers = teamMembers.stream()
+					.filter(u -> project.getMembers() == null || !project.getMembers().contains(u))
+					.toList();
+			model.addAttribute("addableUsers", addableUsers);
+		}
+
 		return "project/detail";
 	}
 
@@ -105,6 +121,32 @@ public class ProjectController {
 			redirectAttributes.addFlashAttribute("deleteError", e.getMessage());
 			return "redirect:/projects/" + id;
 		}
+	}
+
+	// ========== プロジェクトメンバー ==========
+
+	@PostMapping("/{id}/members/add")
+	public String addMember(@PathVariable("id") Long id,
+			@RequestParam("userId") Long userId,
+			RedirectAttributes redirectAttributes) {
+		try {
+			projectService.addMember(id, userId);
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("memberError", e.getMessage());
+		}
+		return "redirect:/projects/" + id;
+	}
+
+	@PostMapping("/{id}/members/{userId}/remove")
+	public String removeMember(@PathVariable("id") Long id,
+			@PathVariable("userId") Long userId,
+			RedirectAttributes redirectAttributes) {
+		try {
+			projectService.removeMember(id, userId);
+		} catch (IllegalStateException e) {
+			redirectAttributes.addFlashAttribute("memberError", e.getMessage());
+		}
+		return "redirect:/projects/" + id;
 	}
 
 	// ========== マイルストーン ==========

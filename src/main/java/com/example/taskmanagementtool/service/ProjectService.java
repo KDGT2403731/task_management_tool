@@ -109,6 +109,40 @@ public class ProjectService {
 		projectRepository.delete(project);
 	}
 
+	@Transactional
+	public void addMember(Long projectId, Long userId) {
+		Project project = getProjectById(projectId);
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("ユーザーが存在しません: " + userId));
+
+		if (user.getTeam() == null || project.getTeam() == null
+				|| !user.getTeam().getId().equals(project.getTeam().getId())) {
+			throw new IllegalArgumentException("このユーザーはプロジェクトのチームに所属していないため追加できません。");
+		}
+
+		if (user.getProjects() == null) {
+			user.setProjects(new HashSet<>());
+		}
+		user.getProjects().add(project);
+		userRepository.save(user);
+	}
+
+	@Transactional
+	public void removeMember(Long projectId, Long userId) {
+		Project project = getProjectById(projectId);
+		User user = userRepository.findById(userId)
+				.orElseThrow(() -> new IllegalArgumentException("ユーザーが存在しません: " + userId));
+
+		if (project.getOwner() != null && project.getOwner().getId().equals(userId)) {
+			throw new IllegalStateException("プロジェクトのオーナーはメンバーから外せません。");
+		}
+
+		if (user.getProjects() != null) {
+			user.getProjects().remove(project);
+			userRepository.save(user);
+		}
+	}
+
 	private User findUserByEmail(String email) {
 		return userRepository.findByEmail(email)
 				.orElseThrow(() -> new IllegalArgumentException("ユーザーが存在しません: " + email));

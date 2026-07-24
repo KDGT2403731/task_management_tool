@@ -37,6 +37,10 @@
 				<span th:text="${deleteError}"></span>
 			</div>
 
+			<div class="banner banner-error" th:if="${memberError}">
+				<span th:text="${memberError}"></span>
+			</div>
+
 			<div class="detail-head">
 				<div>
 					<p class="eyebrow">Project</p>
@@ -84,7 +88,52 @@
 			<p class="detail-description" th:if="${project.description != null and !project.description.isEmpty()}"
 				th:text="${project.description}">プロジェクトの説明文がここに入ります。</p>
 
-			<div class="nav-card-grid">
+			<div class="panel" style="margin-top:24px;">
+				<div class="panel-head"><h2>プロジェクトメンバー</h2></div>
+
+				<ul class="milestone-list" th:if="${project.members != null and !#sets.isEmpty(project.members)}">
+					<li class="milestone-item" th:each="member : ${project.members}">
+						<div class="milestone-main">
+							<p class="milestone-title" th:text="${member.name}"></p>
+							<div class="milestone-meta">
+								<span th:text="${member.email}"></span>
+								<span th:if="${project.owner != null and project.owner.id == member.id}"
+									  class="status-badge badge-done">オーナー</span>
+							</div>
+						</div>
+						<form th:if="${project.owner == null or project.owner.id != member.id}"
+							  th:action="@{/projects/{id}/members/{userId}/remove(id=${projectId}, userId=${member.id})}"
+							  method="post" onsubmit="return confirm('このメンバーをプロジェクトから外しますか？');">
+							<button type="submit" class="btn btn-ghost">外す</button>
+						</form>
+					</li>
+				</ul>
+
+				<div class="empty-state" th:if="${project.members == null or #sets.isEmpty(project.members)}">
+					<p>まだメンバーが追加されていません。</p>
+				</div>
+
+				<form th:if="${addableUsers != null and !#lists.isEmpty(addableUsers)}"
+					  th:action="@{/projects/{id}/members/add(id=${projectId})}" method="post"
+					  class="form-row" style="margin-top:16px;">
+					<div class="form-field">
+						<label for="userId">同じチームのメンバーを追加</label>
+						<select id="userId" name="userId" required>
+							<option th:each="u : ${addableUsers}" th:value="${u.id}" th:text="${u.name} + '（' + ${u.email} + '）'"></option>
+						</select>
+					</div>
+					<div class="form-actions">
+						<button type="submit" class="btn btn-primary">追加する</button>
+					</div>
+				</form>
+
+				<p class="detail-description"
+				   th:if="${addableUsers == null or #lists.isEmpty(addableUsers)}" style="margin-top:16px;">
+					追加できるチームメンバーがいません（チーム全員が既にこのプロジェクトのメンバーです）。
+				</p>
+			</div>
+
+			<div class="nav-card-grid" style="margin-top:24px;">
 				<a class="nav-card" th:href="@{/projects/{id}/tasks(id=${projectId})}">
 					<p class="nav-card-title">タスク一覧</p>
 					<p class="nav-card-desc">カンバン形式でタスクを管理</p>

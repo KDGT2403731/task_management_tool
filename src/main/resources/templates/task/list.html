@@ -10,6 +10,8 @@
 		href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap"
 		rel="stylesheet">
 	<link rel="stylesheet" th:href="@{/css/style.css}">
+	<meta name="_csrf" th:content="${_csrf.token}">
+	<meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 <body>
 
@@ -163,10 +165,15 @@
 				if (!draggedCard) return;
 				const taskId = draggedCard.dataset.taskId;
 				const newStatus = col.dataset.status;
+				const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+				const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
 				fetch(`/projects/${projectId}/tasks/${taskId}/status`, {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+					headers: {
+						'Content-Type': 'application/x-www-form-urlencoded',
+						[csrfHeader]: csrfToken
+					},
 					body: `status=${encodeURIComponent(newStatus)}`
 				}).then(res => {
 					if (res.ok) location.reload();
@@ -176,4 +183,4 @@
 		});
 	</script>
 </body>
-</html></html>
+</html></html>l>

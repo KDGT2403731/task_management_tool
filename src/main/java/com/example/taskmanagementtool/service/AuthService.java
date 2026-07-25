@@ -20,8 +20,7 @@ public class AuthService {
 	private final TeamRepository teamRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public AuthService(UserRepository userRepository, TeamRepository teamRepository,
-			PasswordEncoder passwordEncoder) {
+	public AuthService(UserRepository userRepository, TeamRepository teamRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
 		this.teamRepository = teamRepository;
 		this.passwordEncoder = passwordEncoder;

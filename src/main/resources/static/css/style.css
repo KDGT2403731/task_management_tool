@@ -445,8 +445,8 @@ section h2 {
 }
 
 .auth-card {
-	width: 100%;
-	max-width: 460px;
+	width: 150%;
+	max-width: 445px;
 	background: var(--color-bg-raised);
 	border: 1px solid var(--color-line-faint);
 	border-radius: var(--radius-md);

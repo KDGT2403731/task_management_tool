@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.taskmanagementtool.entity.User;
-import com.example.taskmanagementtool.repository.TeamRepository;
 import com.example.taskmanagementtool.repository.UserRepository;
 
 @Service
@@ -16,13 +15,10 @@ public class AuthService {
 	private static final List<String> ALLOWED_SIGNUP_ROLES = List.of("MEMBER", "GUEST");
 
 	private final UserRepository userRepository;
-	private final TeamRepository teamRepository;
 	private final PasswordEncoder passwordEncoder;
 
-	public AuthService(UserRepository userRepository, TeamRepository teamRepository,
-			PasswordEncoder passwordEncoder) {
+	public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 		this.userRepository = userRepository;
-		this.teamRepository = teamRepository;
 		this.passwordEncoder = passwordEncoder;
 	}
 

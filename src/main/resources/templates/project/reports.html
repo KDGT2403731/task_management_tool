@@ -22,8 +22,8 @@
 				<span class="brand-sub">工程ノート</span>
 			</a>
 			<nav class="nav-actions">
-				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクト詳細</a>
 				<a th:href="@{/projects/{projectId}/tasks(projectId=${projectId})}" class="btn btn-ghost">タスク一覧</a>
+				<a th:href="@{/projects/{id}(id=${projectId})}" class="btn btn-ghost">プロジェクト詳細</a>
 				<form class="logout-form" th:action="@{/logout}" method="post">
 					<button type="submit" class="btn btn-ghost">ログアウト</button>
 				</form>

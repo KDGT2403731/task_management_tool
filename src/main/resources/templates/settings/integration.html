@@ -52,7 +52,7 @@
 					<div>
 						<h2 th:switch="${service}">
 							<span th:case="'SLACK'">Slack</span>
-							<span th:case="'TEAMS'">Microsoft Teams</span>
+							<span th:case="'TEAMS'">Github Teams</span>
 							<span th:case="'GOOGLE_CALENDAR'">Google カレンダー</span>
 							<span th:case="*" th:text="${service}"></span>
 						</h2>
@@ -75,7 +75,7 @@
 					<div style="flex: 1; min-width: 0;">
 						<h2 th:switch="${service}">
 							<span th:case="'SLACK'">Slack</span>
-							<span th:case="'TEAMS'">Microsoft Teams</span>
+							<span th:case="'TEAMS'">GitHub Teams</span>
 							<span th:case="'GOOGLE_CALENDAR'">Google カレンダー</span>
 							<span th:case="*" th:text="${service}"></span>
 						</h2>

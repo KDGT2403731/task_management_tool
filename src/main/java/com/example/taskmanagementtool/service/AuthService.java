@@ -40,10 +40,6 @@ public class AuthService {
 		user.setPasswordHash(passwordEncoder.encode(rawPassword));
 		user.setRole(resolvedRole);
 
-		// MEMBERはプロジェクトを作成するのにチームが必須（ProjectService.createProject）。
-		// サインアップ直後は管理者にチームへ入れてもらうまで何も作れなくなってしまうため、
-		// 本人専用のチームを自動作成して割り当てておく。
-		// 後から管理者が既存チームへ付け替えることもできる（/admin/users/{id}/team）。
 		if ("MEMBER".equals(resolvedRole)) {
 			Team personalTeam = new Team();
 			personalTeam.setName(name + "のチーム");

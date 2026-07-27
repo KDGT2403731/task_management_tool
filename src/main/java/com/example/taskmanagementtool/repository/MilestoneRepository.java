@@ -18,7 +18,6 @@ public interface MilestoneRepository extends JpaRepository<Milestone, Long> {
 			"JOIN m.project p " +
 			"JOIN p.members pm " +
 			"WHERE pm.email = :username " +
-			"AND m.status = 'OPEN' " +
 			"AND m.targetDate >= :today " +
 			"ORDER BY m.targetDate ASC")
 	List<Milestone> findUpcomingMilestonesByUsername(

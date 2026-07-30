@@ -74,7 +74,7 @@ DB_PASSWORD=<データベースパスワード>
 
 ```bash
 # リポジトリをクローン
-git clone https://github.com/KDGT2403731/task_management_tool.git
+git clone git@github.com:KDGT2403731/task_management_tool.git
 cd task_management_tool
 
 # 開発環境で起動（初回スキーマ・シードデータ投入あり）

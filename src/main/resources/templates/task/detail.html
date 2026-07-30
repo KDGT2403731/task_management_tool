@@ -210,7 +210,7 @@
 				<div class="form-field">
 					<label for="precedingTaskId">前提タスク</label>
 					<select id="precedingTaskId" name="precedingTaskId" required>
-						<option th:each="t : ${otherTasks}" th:value="${t.id}" th:text="${t.title}"></option>
+						<option th:each="t : ${precedingTaskOptions}" th:value="${t.id}" th:text="${t.title}"></option>
 					</select>
 				</div>
 
@@ -246,7 +246,7 @@
 				<div class="form-field">
 					<label for="succeedingTaskId">後続タスク</label>
 					<select id="succeedingTaskId" name="succeedingTaskId" required>
-						<option th:each="t : ${otherTasks}" th:value="${t.id}" th:text="${t.title}"></option>
+						<option th:each="t : ${succeedingTaskOptions}" th:value="${t.id}" th:text="${t.title}"></option>
 					</select>
 				</div>
 

@@ -149,6 +149,8 @@
 			</div>
 
 			<!-- ===== 依存関係 ===== -->
+			<div class="banner banner-error" th:if="${dependencyError}" th:text="${dependencyError}"
+				style="margin-top:24px;"></div>
 			<div class="dashboard-grid" style="margin-top:24px;">
 				<div class="panel">
 					<div class="panel-head">

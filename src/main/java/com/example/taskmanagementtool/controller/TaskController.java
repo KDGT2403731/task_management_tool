@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.taskmanagementtool.entity.Task;
 import com.example.taskmanagementtool.service.RecurringRuleService;
@@ -132,13 +133,18 @@ public class TaskController {
 			@PathVariable("taskId") Long succeedingTaskId,
 			@RequestParam("precedingTaskId") Long precedingTaskId,
 			@RequestParam(value = "dependencyType", defaultValue = "FS") String dependencyType,
-			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays) {
+			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays,
+			RedirectAttributes redirectAttributes) {
 
 		// succeedingTaskId(URLのtaskId)が本当にこのprojectIdに属しているかを検証してから処理する。
 		// これがないと、他プロジェクトのタスクIDを直接指定して依存関係を作られてしまう。
 		taskService.getTaskInProject(projectId, succeedingTaskId);
 
-		taskDependencyService.addDependency(precedingTaskId, succeedingTaskId, dependencyType, lagDays);
+		try {
+			taskDependencyService.addDependency(precedingTaskId, succeedingTaskId, dependencyType, lagDays);
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("dependencyError", e.getMessage());
+		}
 
 		return "redirect:/projects/" + projectId + "/tasks/" + succeedingTaskId;
 	}
@@ -148,12 +154,17 @@ public class TaskController {
 			@PathVariable("taskId") Long precedingTaskId,
 			@RequestParam("succeedingTaskId") Long succeedingTaskId,
 			@RequestParam(value = "dependencyType", defaultValue = "FS") String dependencyType,
-			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays) {
+			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays,
+			RedirectAttributes redirectAttributes) {
 
 		// precedingTaskId(URLのtaskId)が本当にこのprojectIdに属しているかを検証してから処理する。
 		taskService.getTaskInProject(projectId, precedingTaskId);
 
-		taskDependencyService.addDependency(precedingTaskId, succeedingTaskId, dependencyType, lagDays);
+		try {
+			taskDependencyService.addDependency(precedingTaskId, succeedingTaskId, dependencyType, lagDays);
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("dependencyError", e.getMessage());
+		}
 
 		return "redirect:/projects/" + projectId + "/tasks/" + precedingTaskId;
 	}

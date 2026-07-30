@@ -1,6 +1,10 @@
 package com.example.taskmanagementtool.service;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +43,14 @@ public class TaskDependencyService {
 			throw new IllegalArgumentException("異なるプロジェクトのタスク同士を依存関係にすることはできません。");
 		}
 
+		// 循環依存チェック：succeedingTaskId側から既存の依存関係を辿ってprecedingTaskIdに到達できる場合、
+		// この依存関係を追加すると「AがBの前提かつBがAの前提」のような循環が発生してしまうため禁止する。
+		// （例：?????→タスク2 が既にある状態で タスク2→????? を追加しようとするケースを防ぐ）
+		if (hasPathBetween(succeedingTaskId, precedingTaskId)) {
+			throw new IllegalArgumentException(
+					"この組み合わせは既存の依存関係と矛盾するため登録できません（タスク同士が互いの前提になってしまいます）。");
+		}
+
 		TaskDependency dependency = new TaskDependency();
 		dependency.setPrecedingTask(precedingTask);
 		dependency.setSucceedingTask(succeedingTask);
@@ -46,6 +58,30 @@ public class TaskDependencyService {
 		dependency.setLagDays(lagDays != null ? lagDays : 0);
 
 		taskDependencyRepository.save(dependency);
+	}
+
+	/**
+	 * 既存の依存関係（前提→後続の有向グラフ）だけを辿って、fromTaskIdからtoTaskIdに到達できるかを判定する。
+	 * 到達できる場合、fromTaskIdを前提・toTaskIdを後続とする新規登録は循環依存を生む。
+	 */
+	private boolean hasPathBetween(Long fromTaskId, Long toTaskId) {
+		Set<Long> visited = new HashSet<>();
+		Deque<Long> stack = new ArrayDeque<>();
+		stack.push(fromTaskId);
+
+		while (!stack.isEmpty()) {
+			Long current = stack.pop();
+			if (current.equals(toTaskId)) {
+				return true;
+			}
+			if (!visited.add(current)) {
+				continue;
+			}
+			for (TaskDependency dep : taskDependencyRepository.findByPrecedingTaskId(current)) {
+				stack.push(dep.getSucceedingTask().getId());
+			}
+		}
+		return false;
 	}
 
 	@Transactional(readOnly = true)

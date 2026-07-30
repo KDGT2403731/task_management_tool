@@ -143,6 +143,21 @@ public class TaskController {
 		return "redirect:/projects/" + projectId + "/tasks/" + succeedingTaskId;
 	}
 
+	@PostMapping("/{taskId}/dependencies/add-succeeding")
+	public String addSucceedingDependency(@PathVariable("projectId") Long projectId,
+			@PathVariable("taskId") Long precedingTaskId,
+			@RequestParam("succeedingTaskId") Long succeedingTaskId,
+			@RequestParam(value = "dependencyType", defaultValue = "FS") String dependencyType,
+			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays) {
+
+		// precedingTaskId(URLのtaskId)が本当にこのprojectIdに属しているかを検証してから処理する。
+		taskService.getTaskInProject(projectId, precedingTaskId);
+
+		taskDependencyService.addDependency(precedingTaskId, succeedingTaskId, dependencyType, lagDays);
+
+		return "redirect:/projects/" + projectId + "/tasks/" + precedingTaskId;
+	}
+
 	// ========== 繰り返し設定（UC08） ==========
 
 	@GetMapping("/recurring")

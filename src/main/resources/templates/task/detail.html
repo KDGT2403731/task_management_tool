@@ -233,6 +233,42 @@
 				</div>
 			</form>
 
+			<!-- ===== 後続タスクの追加 ===== -->
+			<form class="form-card" style="margin-top:24px;"
+				th:action="@{/projects/{projectId}/tasks/{taskId}/dependencies/add-succeeding(projectId=${projectId}, taskId=${taskId})}"
+				method="post">
+				<div class="panel-head">
+					<h2>後続タスクを追加</h2>
+				</div>
+
+				<div class="form-field">
+					<label for="succeedingTaskId">後続タスク</label>
+					<select id="succeedingTaskId" name="succeedingTaskId" required>
+						<option th:each="t : ${otherTasks}" th:value="${t.id}" th:text="${t.title}"></option>
+					</select>
+				</div>
+
+				<div class="form-row">
+					<div class="form-field">
+						<label for="succeedingDependencyType">依存タイプ</label>
+						<select id="succeedingDependencyType" name="dependencyType">
+							<option value="FS" selected>FS（完了→開始）</option>
+							<option value="SS">SS（開始→開始）</option>
+							<option value="FF">FF（完了→完了）</option>
+							<option value="SF">SF（開始→完了）</option>
+						</select>
+					</div>
+					<div class="form-field">
+						<label for="succeedingLagDays">ラグ日数</label>
+						<input type="number" id="succeedingLagDays" name="lagDays" value="0">
+					</div>
+				</div>
+
+				<div class="form-actions">
+					<button type="submit" class="btn btn-ghost">追加</button>
+				</div>
+			</form>
+
 			<!-- ===== 繰り返し設定 ===== -->
 			<form class="form-card" style="margin-top:24px;"
 				th:action="@{/projects/{projectId}/tasks/{taskId}/recurring(projectId=${projectId}, taskId=${taskId})}"
@@ -256,7 +292,7 @@
 
 				<div class="form-field">
 					<label for="cronExpression">Cron式（任意）</label>
-					<input type="text" id="cronExpression" name="cronExpression" placeholder="0 0 9 1 * ?">
+					<input type="text" id="cronExpression" name="cronExpression" placeholder="秒 分 時 日 月 曜日 [年(省略可)]">
 				</div>
 
 				<div class="form-actions">

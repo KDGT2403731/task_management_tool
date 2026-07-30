@@ -1,6 +1,9 @@
 package com.example.taskmanagementtool.controller;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.taskmanagementtool.entity.Task;
+import com.example.taskmanagementtool.entity.TaskDependency;
 import com.example.taskmanagementtool.service.RecurringRuleService;
 import com.example.taskmanagementtool.service.TaskDependencyService;
 import com.example.taskmanagementtool.service.TaskService;
@@ -53,13 +57,37 @@ public class TaskController {
 	@GetMapping("/{taskId}")
 	public String taskDetail(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
 			Model model) {
+		List<Task> otherTasks = taskService.listOtherTasksInProject(projectId, taskId);
+		List<TaskDependency> precedingDependencies = taskDependencyService.getPrecedingDependencies(taskId);
+		List<TaskDependency> succeedingDependencies = taskDependencyService.getSucceedingDependencies(taskId);
+
+		Set<Long> alreadyPrecedingIds = precedingDependencies.stream()
+				.map(dep -> dep.getPrecedingTask().getId())
+				.collect(Collectors.toSet());
+		Set<Long> alreadySucceedingIds = succeedingDependencies.stream()
+				.map(dep -> dep.getSucceedingTask().getId())
+				.collect(Collectors.toSet());
+
+		// 前提タスクの候補：すでに前提として登録済みのタスク、および追加すると循環になるタスクを除外する
+		List<Task> precedingTaskOptions = otherTasks.stream()
+				.filter(t -> !alreadyPrecedingIds.contains(t.getId()))
+				.filter(t -> !taskDependencyService.wouldCreateCycle(t.getId(), taskId))
+				.toList();
+
+		// 後続タスクの候補：すでに後続として登録済みのタスク、および追加すると循環になるタスクを除外する
+		List<Task> succeedingTaskOptions = otherTasks.stream()
+				.filter(t -> !alreadySucceedingIds.contains(t.getId()))
+				.filter(t -> !taskDependencyService.wouldCreateCycle(taskId, t.getId()))
+				.toList();
+
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("taskId", taskId);
 		model.addAttribute("task", taskService.getTaskInProject(projectId, taskId));
 		model.addAttribute("assignableUsers", taskService.listAssignableUsers(projectId));
-		model.addAttribute("otherTasks", taskService.listOtherTasksInProject(projectId, taskId));
-		model.addAttribute("precedingDependencies", taskDependencyService.getPrecedingDependencies(taskId));
-		model.addAttribute("succeedingDependencies", taskDependencyService.getSucceedingDependencies(taskId));
+		model.addAttribute("precedingTaskOptions", precedingTaskOptions);
+		model.addAttribute("succeedingTaskOptions", succeedingTaskOptions);
+		model.addAttribute("precedingDependencies", precedingDependencies);
+		model.addAttribute("succeedingDependencies", succeedingDependencies);
 		model.addAttribute("frequencies", RecurringRuleService.VALID_FREQUENCIES);
 		return "task/detail";
 	}

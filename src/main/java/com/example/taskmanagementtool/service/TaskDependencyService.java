@@ -45,8 +45,8 @@ public class TaskDependencyService {
 
 		// 循環依存チェック：succeedingTaskId側から既存の依存関係を辿ってprecedingTaskIdに到達できる場合、
 		// この依存関係を追加すると「AがBの前提かつBがAの前提」のような循環が発生してしまうため禁止する。
-		// （例：?????→タスク2 が既にある状態で タスク2→????? を追加しようとするケースを防ぐ）
-		if (hasPathBetween(succeedingTaskId, precedingTaskId)) {
+		// （例：22222→タスク2 が既にある状態で タスク2→22222 を追加しようとするケースを防ぐ）
+		if (wouldCreateCycle(precedingTaskId, succeedingTaskId)) {
 			throw new IllegalArgumentException(
 					"この組み合わせは既存の依存関係と矛盾するため登録できません（タスク同士が互いの前提になってしまいます）。");
 		}
@@ -58,6 +58,16 @@ public class TaskDependencyService {
 		dependency.setLagDays(lagDays != null ? lagDays : 0);
 
 		taskDependencyRepository.save(dependency);
+	}
+
+	/**
+	 * precedingTaskIdを前提・succeedingTaskIdを後続として新規に依存関係を追加した場合に、
+	 * 既存の依存関係との組み合わせで循環（お互いが前提になる状態）が生まれるかどうかを判定する。
+	 * フォームの選択肢を事前に絞り込む用途と、addDependency内の登録防止チェックの両方から使う。
+	 */
+	@Transactional(readOnly = true)
+	public boolean wouldCreateCycle(Long precedingTaskId, Long succeedingTaskId) {
+		return hasPathBetween(succeedingTaskId, precedingTaskId);
 	}
 
 	/**

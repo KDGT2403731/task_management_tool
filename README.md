@@ -72,13 +72,53 @@ DB_PASSWORD=<データベースパスワード>
 
 ### 起動手順
 
+#### 1. リポジトリをクローン
+
 ```bash
-# リポジトリをクローン
 git clone git@github.com:KDGT2403731/task_management_tool.git
 cd task_management_tool
+```
 
-# 開発環境で起動（初回スキーマ・シードデータ投入あり）
+#### 2. データベースを準備
+
+PostgreSQLを起動し、アプリ用のデータベースを作成しておきます。
+
+```bash
+createdb taskmanagementtool
+```
+
+（DB名・接続情報は `application.properties` の設定に合わせてください）
+
+#### 3. 環境変数を設定（任意）
+
+`DB_PASSWORD` は各自の環境のDBパスワードに合わせて設定してください。
+`APP_ENCRYPTION_SECRET_KEY` は未設定でも開発用のデフォルト値で起動しますが、本番運用時は必ず独自の値を設定してください。
+
+```bash
+export DB_PASSWORD=<データベースパスワード>
+export APP_ENCRYPTION_SECRET_KEY=<暗号化用シークレットキー>
+```
+
+#### 4. アプリケーションを起動
+
+開発環境（`dev`プロファイル）で起動すると、`schema.sql` / `data.sql` によりテーブル作成とシードデータ投入が自動で行われます。
+
+```bash
 ./gradlew bootRun --args='--spring.profiles.active=dev'
+```
+
+`dev`プロファイルを指定しない場合、スキーマの自動初期化は行われません（`spring.sql.init.mode=never`）。既存データを保持したまま本番相当の環境で起動する場合はこちらを使用してください。
+
+```bash
+./gradlew bootRun
+```
+
+#### 5. アクセス
+
+起動後、ブラウザで以下にアクセスします。
+
+```
+http://localhost:8080
 ```
 
 ## アーキテクチャ

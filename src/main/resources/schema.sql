@@ -1,5 +1,6 @@
 -- 既存テーブルを一旦削除（開発中の再実行を想定。依存関係があるためCASCADE指定）
 DROP TABLE IF EXISTS integrations CASCADE;
+DROP TABLE IF EXISTS system_settings CASCADE;
 DROP TABLE IF EXISTS recurring_rules CASCADE;
 DROP TABLE IF EXISTS task_dependencies CASCADE;
 DROP TABLE IF EXISTS tasks CASCADE;

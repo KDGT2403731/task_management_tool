@@ -35,12 +35,16 @@ public class AuthController {
 	@GetMapping("/login")
 	public String login(@RequestParam(value = "error", required = false) String error,
 			@RequestParam(value = "logout", required = false) String logout,
+			@RequestParam(value = "success", required = false) String success,
 			Model model) {
 		if (error != null) {
 			model.addAttribute("loginError", "メールアドレスまたはパスワードが正しくありません。");
 		}
 		if (logout != null) {
 			model.addAttribute("message", "ログアウトしました。");
+		}
+		if (success != null) {
+			model.addAttribute("message", "登録が完了しました。ログインしてください。");
 		}
 		return "login";
 	}

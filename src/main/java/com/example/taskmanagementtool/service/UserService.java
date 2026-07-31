@@ -45,6 +45,12 @@ public class UserService {
 		return userRepository.count();
 	}
 
+	@Transactional(readOnly = true)
+	public User getUserByEmail(String email) {
+		return userRepository.findByEmail(email)
+				.orElseThrow(() -> new IllegalArgumentException("ユーザーが存在しません: " + email));
+	}
+
 	@Transactional
 	public User updateRole(Long id, String role) {
 		if (!VALID_ROLES.contains(role)) {

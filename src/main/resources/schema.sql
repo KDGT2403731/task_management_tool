@@ -115,3 +115,13 @@ CREATE TABLE integrations (
     expires_at              TIMESTAMP,
     CONSTRAINT uq_integrations_user_service UNIQUE (user_id, service_name)
 );
+
+CREATE TABLE system_settings (
+    id BIGINT PRIMARY KEY,
+    maintenance_mode BOOLEAN NOT NULL DEFAULT FALSE,
+    announcement_message TEXT,
+    backup_frequency VARCHAR(20) NOT NULL DEFAULT 'DAILY',
+    last_backup_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    updated_by BIGINT REFERENCES users(id)
+);

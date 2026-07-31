@@ -51,15 +51,40 @@
 				</div>
 			</div>
 
-			<div class="nav-card-grid">
-				<a class="nav-card" href="/admin/users">
-					<p class="nav-card-title">ユーザー管理</p>
-					<p class="nav-card-desc">ユーザーの登録・一覧・ロール変更</p>
-				</a>
-				<a class="nav-card" href="/admin/teams">
-					<p class="nav-card-title">チーム・部署管理</p>
-					<p class="nav-card-desc">組織、チーム、部署の作成・所属設定</p>
-				</a>
+			<div th:if="${settingsSuccess}" class="banner-success" th:text="${settingsSuccess}"></div>
+			<div th:if="${settingsError}" class="banner-error" th:text="${settingsError}"></div>
+
+			<div class="panel">
+				<h2>アプリケーション設定</h2>
+				<form th:action="@{/admin/system/settings}" method="post" class="form-card">
+					<div class="form-group">
+						<label>
+							<input type="checkbox" name="maintenanceMode" value="true" th:checked="${settings.maintenanceMode}">
+							メンテナンスモードを有効にする
+						</label>
+					</div>
+					<div class="form-group">
+						<label for="announcementMessage">全体お知らせメッセージ</label>
+						<textarea id="announcementMessage" name="announcementMessage" rows="3" th:text="${settings.announcementMessage}"></textarea>
+					</div>
+					<div class="form-group">
+						<label for="backupFrequency">自動バックアップ頻度</label>
+						<select id="backupFrequency" name="backupFrequency">
+							<option value="DAILY" th:selected="${settings.backupFrequency == 'DAILY'}">毎日</option>
+							<option value="WEEKLY" th:selected="${settings.backupFrequency == 'WEEKLY'}">毎週</option>
+							<option value="MONTHLY" th:selected="${settings.backupFrequency == 'MONTHLY'}">毎月</option>
+						</select>
+					</div>
+					<button type="submit" class="btn btn-primary">設定を保存</button>
+				</form>
+
+				<div class="meta-item" style="margin-top:16px;">
+					<span class="meta-label">最終バックアップ日時</span>
+					<span th:text="${settings.lastBackupAt != null} ? ${#temporals.format(settings.lastBackupAt, 'yyyy-MM-dd HH:mm')} : '未実行'"></span>
+				</div>
+				<form th:action="@{/admin/system/backup}" method="post">
+					<button type="submit" class="btn btn-ghost">今すぐバックアップを実行</button>
+				</form>
 			</div>
 
 		</div>

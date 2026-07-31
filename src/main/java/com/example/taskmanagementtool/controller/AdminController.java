@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.taskmanagementtool.entity.Team;
+import com.example.taskmanagementtool.entity.User;
+import com.example.taskmanagementtool.service.SystemSettingsService;
 import com.example.taskmanagementtool.service.TeamService;
 import com.example.taskmanagementtool.service.UserService;
 
@@ -23,10 +25,13 @@ import com.example.taskmanagementtool.service.UserService;
 public class AdminController {
 	private final UserService userService;
 	private final TeamService teamService;
+	private final SystemSettingsService systemSettingsService;
 
-	public AdminController(UserService userService, TeamService teamService) {
+	public AdminController(UserService userService, TeamService teamService,
+			SystemSettingsService systemSettingsService) {
 		this.userService = userService;
 		this.teamService = teamService;
+		this.systemSettingsService = systemSettingsService;
 	}
 
 	// ========== UC01: ユーザー管理 ==========
@@ -126,6 +131,31 @@ public class AdminController {
 	public String system(Model model) {
 		model.addAttribute("totalUsers", userService.countUsers());
 		model.addAttribute("totalTeams", teamService.countTeams());
+		model.addAttribute("settings", systemSettingsService.getSettings());
 		return "admin/system";
+	}
+
+	@PostMapping("/system/settings") // ← 追加
+	public String updateSettings(
+			@RequestParam(value = "maintenanceMode", required = false, defaultValue = "false") boolean maintenanceMode,
+			@RequestParam(value = "announcementMessage", required = false) String announcementMessage,
+			@RequestParam("backupFrequency") String backupFrequency,
+			@AuthenticationPrincipal UserDetails userDetails,
+			RedirectAttributes redirectAttributes) {
+		try {
+			User admin = userService.getUserByEmail(userDetails.getUsername()); // ← メソッド名は要確認
+			systemSettingsService.updateSettings(maintenanceMode, announcementMessage, backupFrequency, admin);
+			redirectAttributes.addFlashAttribute("settingsSuccess", "設定を更新しました");
+		} catch (IllegalArgumentException e) {
+			redirectAttributes.addFlashAttribute("settingsError", e.getMessage());
+		}
+		return "redirect:/admin/system";
+	}
+
+	@PostMapping("/system/backup") // ← 追加
+	public String runBackup(RedirectAttributes redirectAttributes) {
+		systemSettingsService.runBackupNow();
+		redirectAttributes.addFlashAttribute("settingsSuccess", "バックアップを実行しました（記録のみ）");
+		return "redirect:/admin/system";
 	}
 }

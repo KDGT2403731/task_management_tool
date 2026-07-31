@@ -46,7 +46,9 @@ public class ProjectController {
 	}
 
 	@GetMapping("/{id}")
-	public String projectDetail(@PathVariable("id") Long id, Model model) {
+	public String projectDetail(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
+			Model model) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		Project project = projectService.getProjectById(id);
 		model.addAttribute("project", project);
 		model.addAttribute("projectId", id);
@@ -94,25 +96,30 @@ public class ProjectController {
 	}
 
 	@GetMapping("/{id}/edit")
-	public String editProjectForm(@PathVariable("id") Long id, Model model) {
+	public String editProjectForm(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
+			Model model) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		model.addAttribute("project", projectService.getProjectById(id));
 		return "project/edit";
 	}
 
 	@PostMapping("/{id}/edit")
-	public String updateProject(@PathVariable("id") Long id,
+	public String updateProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
 			@RequestParam("name") String name,
 			@RequestParam(value = "description", required = false) String description,
 			@RequestParam(value = "startDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@RequestParam(value = "endDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		projectService.updateProject(id, name, description, startDate, endDate);
 		return "redirect:/projects/" + id;
 	}
 
 	@PostMapping("/{id}/delete")
-	public String deleteProject(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
+	public String deleteProject(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
+			RedirectAttributes redirectAttributes) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		try {
 			projectService.deleteProject(id);
 			return "redirect:/projects";
@@ -126,9 +133,10 @@ public class ProjectController {
 	// ========== プロジェクトメンバー ==========
 
 	@PostMapping("/{id}/members/add")
-	public String addMember(@PathVariable("id") Long id,
+	public String addMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
 			@RequestParam("userId") Long userId,
 			RedirectAttributes redirectAttributes) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		try {
 			projectService.addMember(id, userId);
 		} catch (IllegalArgumentException e) {
@@ -138,9 +146,10 @@ public class ProjectController {
 	}
 
 	@PostMapping("/{id}/members/{userId}/remove")
-	public String removeMember(@PathVariable("id") Long id,
+	public String removeMember(@AuthenticationPrincipal UserDetails userDetails, @PathVariable("id") Long id,
 			@PathVariable("userId") Long userId,
 			RedirectAttributes redirectAttributes) {
+		projectService.assertAccessible(id, userDetails.getUsername());
 		try {
 			projectService.removeMember(id, userId);
 		} catch (IllegalStateException e) {
@@ -152,7 +161,9 @@ public class ProjectController {
 	// ========== マイルストーン ==========
 
 	@GetMapping("/{projectId}/milestones")
-	public String listMilestones(@PathVariable("projectId") Long projectId, Model model) {
+	public String listMilestones(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("project", projectService.getProjectById(projectId));
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("milestones", milestoneService.listByProject(projectId));
@@ -160,34 +171,42 @@ public class ProjectController {
 	}
 
 	@GetMapping("/{projectId}/milestones/{milestoneId}")
-	public String milestoneDetail(@PathVariable("projectId") Long projectId,
+	public String milestoneDetail(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("milestoneId") Long milestoneId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("milestone", milestoneService.getMilestoneInProject(projectId, milestoneId));
 		return "milestone/detail";
 	}
 
 	@GetMapping("/{projectId}/milestones/create")
-	public String createMilestoneForm(@PathVariable("projectId") Long projectId, Model model) {
+	public String createMilestoneForm(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("milestone", new Milestone());
 		return "milestone/create";
 	}
 
 	@PostMapping("/{projectId}/milestones/create")
-	public String createMilestone(@PathVariable("projectId") Long projectId,
+	public String createMilestone(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@RequestParam("title") String title,
 			@RequestParam(value = "targetDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
 			@RequestParam(value = "description", required = false) String description) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		milestoneService.createMilestone(projectId, title, targetDate, description);
 		return "redirect:/projects/" + projectId + "/milestones";
 	}
 
 	@GetMapping("/{projectId}/milestones/{milestoneId}/edit")
-	public String editMilestoneForm(@PathVariable("projectId") Long projectId,
+	public String editMilestoneForm(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("milestoneId") Long milestoneId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("milestone", milestoneService.getMilestoneInProject(projectId, milestoneId));
 		model.addAttribute("statuses", MilestoneService.VALID_STATUSES);
@@ -195,7 +214,8 @@ public class ProjectController {
 	}
 
 	@PostMapping("/{projectId}/milestones/{milestoneId}/edit")
-	public String updateMilestone(@PathVariable("projectId") Long projectId,
+	public String updateMilestone(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("milestoneId") Long milestoneId,
 			@RequestParam("title") String title,
 			@RequestParam(value = "targetDate", required = false)
@@ -203,24 +223,29 @@ public class ProjectController {
 			@RequestParam(value = "description", required = false) String description,
 			@RequestParam(value = "status", required = false) String status) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		milestoneService.updateMilestone(projectId, milestoneId, title, targetDate, description, status);
 		return "redirect:/projects/" + projectId + "/milestones/" + milestoneId;
 	}
 
 	@PostMapping("/{projectId}/milestones/{milestoneId}/status")
-	public String updateMilestoneStatus(@PathVariable("projectId") Long projectId,
+	public String updateMilestoneStatus(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("milestoneId") Long milestoneId,
 			@RequestParam("status") String status) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		milestoneService.updateStatus(projectId, milestoneId, status);
 		return "redirect:/projects/" + projectId + "/milestones/" + milestoneId;
 	}
 
 	@PostMapping("/{projectId}/milestones/{milestoneId}/delete")
-	public String deleteMilestone(@PathVariable("projectId") Long projectId,
+	public String deleteMilestone(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("milestoneId") Long milestoneId,
 			RedirectAttributes redirectAttributes) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		try {
 			milestoneService.deleteMilestone(projectId, milestoneId);
 			return "redirect:/projects/" + projectId + "/milestones";

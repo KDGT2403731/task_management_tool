@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,30 @@ public class ProjectService {
 	@Transactional(readOnly = true)
 	public long countActiveProjects() {
 		return projectRepository.countByStatus("IN_PROGRESS");
+	}
+
+	/**
+	 * 指定ユーザーがこのプロジェクトを閲覧・操作できるかを検証する。
+	 * ADMINは全プロジェクトにアクセス可能。それ以外はプロジェクトと同じチームに
+	 * 所属している場合のみアクセス可能（URLのIDを変えて他チームのプロジェクトを
+	 * 覗き見・改ざんできてしまうのを防ぐため）。
+	 */
+	@Transactional(readOnly = true)
+	public void assertAccessible(Long projectId, String email) {
+		Project project = getProjectById(projectId);
+		User currentUser = findUserByEmail(email);
+
+		if ("ADMIN".equals(currentUser.getRole())) {
+			return;
+		}
+
+		boolean sameTeam = project.getTeam() != null
+				&& currentUser.getTeam() != null
+				&& project.getTeam().getId().equals(currentUser.getTeam().getId());
+
+		if (!sameTeam) {
+			throw new AccessDeniedException("このプロジェクトへのアクセス権がありません。");
+		}
 	}
 
 	@Transactional

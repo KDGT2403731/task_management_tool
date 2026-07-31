@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.taskmanagementtool.entity.Task;
 import com.example.taskmanagementtool.entity.TaskDependency;
+import com.example.taskmanagementtool.service.ProjectService;
 import com.example.taskmanagementtool.service.RecurringRuleService;
 import com.example.taskmanagementtool.service.TaskDependencyService;
 import com.example.taskmanagementtool.service.TaskService;
@@ -30,16 +31,20 @@ public class TaskController {
 	private final TaskService taskService;
 	private final TaskDependencyService taskDependencyService;
 	private final RecurringRuleService recurringRuleService;
+	private final ProjectService projectService;
 
 	public TaskController(TaskService taskService, TaskDependencyService taskDependencyService,
-			RecurringRuleService recurringRuleService) {
+			RecurringRuleService recurringRuleService, ProjectService projectService) {
 		this.taskService = taskService;
 		this.taskDependencyService = taskDependencyService;
 		this.recurringRuleService = recurringRuleService;
+		this.projectService = projectService;
 	}
 
 	@GetMapping
-	public String listTasks(@PathVariable("projectId") Long projectId, Model model) {
+	public String listTasks(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("project", taskService.getProjectOrThrow(projectId));
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("tasks", taskService.listByProject(projectId));
@@ -47,7 +52,9 @@ public class TaskController {
 	}
 
 	@GetMapping("/gantt")
-	public String ganttChart(@PathVariable("projectId") Long projectId, Model model) {
+	public String ganttChart(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("dependencies", taskDependencyService.getDependenciesByProject(projectId));
 		model.addAttribute("tasks", taskService.listByProject(projectId));
@@ -55,8 +62,10 @@ public class TaskController {
 	}
 
 	@GetMapping("/{taskId}")
-	public String taskDetail(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
+	public String taskDetail(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
 			Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		List<Task> otherTasks = taskService.listOtherTasksInProject(projectId, taskId);
 		List<TaskDependency> precedingDependencies = taskDependencyService.getPrecedingDependencies(taskId);
 		List<TaskDependency> succeedingDependencies = taskDependencyService.getSucceedingDependencies(taskId);
@@ -93,7 +102,9 @@ public class TaskController {
 	}
 
 	@GetMapping("/create")
-	public String createTaskForm(@PathVariable("projectId") Long projectId, Model model) {
+	public String createTaskForm(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("task", new Task());
 		model.addAttribute("assignableUsers", taskService.listAssignableUsers(projectId));
@@ -113,6 +124,7 @@ public class TaskController {
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dueDate,
 			@RequestParam(value = "planHours", required = false) Integer planHours) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		taskService.createTask(projectId, userDetails.getUsername(), title, description, priority, assigneeId,
 				startDate, dueDate, planHours);
 
@@ -120,7 +132,8 @@ public class TaskController {
 	}
 
 	@PostMapping("/{taskId}/edit")
-	public String updateTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
+	public String updateTask(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId,
 			@RequestParam("title") String title,
 			@RequestParam(value = "description", required = false) String description,
 			@RequestParam(value = "priority", required = false) String priority,
@@ -132,6 +145,7 @@ public class TaskController {
 			@RequestParam(value = "planHours", required = false) Integer planHours,
 			@RequestParam(value = "actualHours", required = false) Integer actualHours) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		taskService.updateTask(projectId, taskId, title, description, priority, assigneeId, startDate, dueDate,
 				planHours, actualHours);
 
@@ -139,7 +153,9 @@ public class TaskController {
 	}
 
 	@PostMapping("/{taskId}/delete")
-	public String deleteTask(@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId) {
+	public String deleteTask(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, @PathVariable("taskId") Long taskId) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		taskService.deleteTask(projectId, taskId);
 		return "redirect:/projects/" + projectId + "/tasks";
 	}
@@ -147,9 +163,11 @@ public class TaskController {
 	// ========== カンバン: ステータス更新 ==========
 
 	@PostMapping("/{taskId}/status")
-	public ResponseEntity<Void> updateStatus(@PathVariable("projectId") Long projectId,
+	public ResponseEntity<Void> updateStatus(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("taskId") Long taskId,
 			@RequestParam("status") String status) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		taskService.updateStatus(projectId, taskId, status);
 		return ResponseEntity.ok().build();
 	}
@@ -157,13 +175,15 @@ public class TaskController {
 	// ========== 依存関係設定（UC09 スケジュール可視化の一部） ==========
 
 	@PostMapping("/{taskId}/dependencies/add")
-	public String addDependency(@PathVariable("projectId") Long projectId,
+	public String addDependency(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("taskId") Long succeedingTaskId,
 			@RequestParam("precedingTaskId") Long precedingTaskId,
 			@RequestParam(value = "dependencyType", defaultValue = "FS") String dependencyType,
 			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays,
 			RedirectAttributes redirectAttributes) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		// succeedingTaskId(URLのtaskId)が本当にこのprojectIdに属しているかを検証してから処理する。
 		// これがないと、他プロジェクトのタスクIDを直接指定して依存関係を作られてしまう。
 		taskService.getTaskInProject(projectId, succeedingTaskId);
@@ -178,13 +198,15 @@ public class TaskController {
 	}
 
 	@PostMapping("/{taskId}/dependencies/add-succeeding")
-	public String addSucceedingDependency(@PathVariable("projectId") Long projectId,
+	public String addSucceedingDependency(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("taskId") Long precedingTaskId,
 			@RequestParam("succeedingTaskId") Long succeedingTaskId,
 			@RequestParam(value = "dependencyType", defaultValue = "FS") String dependencyType,
 			@RequestParam(value = "lagDays", defaultValue = "0") Integer lagDays,
 			RedirectAttributes redirectAttributes) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		// precedingTaskId(URLのtaskId)が本当にこのprojectIdに属しているかを検証してから処理する。
 		taskService.getTaskInProject(projectId, precedingTaskId);
 
@@ -200,7 +222,9 @@ public class TaskController {
 	// ========== 繰り返し設定（UC08） ==========
 
 	@GetMapping("/recurring")
-	public String listRecurringRules(@PathVariable("projectId") Long projectId, Model model) {
+	public String listRecurringRules(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId, Model model) {
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		model.addAttribute("projectId", projectId);
 		model.addAttribute("rules", recurringRuleService.listByProject(projectId));
 		model.addAttribute("frequencies", RecurringRuleService.VALID_FREQUENCIES);
@@ -208,13 +232,15 @@ public class TaskController {
 	}
 
 	@PostMapping("/{taskId}/recurring")
-	public String createRecurringRule(@PathVariable("projectId") Long projectId,
+	public String createRecurringRule(@AuthenticationPrincipal UserDetails userDetails,
+			@PathVariable("projectId") Long projectId,
 			@PathVariable("taskId") Long taskId,
 			@RequestParam("frequency") String frequency,
 			@RequestParam(value = "cronExpression", required = false) String cronExpression,
 			@RequestParam(value = "endDate", required = false)
 			@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
 
+		projectService.assertAccessible(projectId, userDetails.getUsername());
 		recurringRuleService.createFromTask(projectId, taskId, frequency, cronExpression, endDate);
 		return "redirect:/projects/" + projectId + "/tasks/" + taskId;
 	}

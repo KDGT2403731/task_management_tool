@@ -40,7 +40,7 @@
 				</div>
 			</div>
 
-			<div class="detail-meta" style="margin-bottom:28px;">
+			<div class="detail-meta">
 				<div class="meta-item">
 					<span class="meta-label">総ユーザー数</span>
 					<span th:text="${totalUsers} + '人'"></span>
@@ -51,40 +51,54 @@
 				</div>
 			</div>
 
-			<div th:if="${settingsSuccess}" class="banner-success" th:text="${settingsSuccess}"></div>
-			<div th:if="${settingsError}" class="banner-error" th:text="${settingsError}"></div>
+			<div th:if="${settingsSuccess}" class="banner banner-success" th:text="${settingsSuccess}"></div>
+			<div th:if="${settingsError}" class="banner banner-error" th:text="${settingsError}"></div>
 
-			<div class="panel">
-				<h2>アプリケーション設定</h2>
-				<form th:action="@{/admin/system/settings}" method="post" class="form-card">
-					<div class="form-group">
-						<label>
-							<input type="checkbox" name="maintenanceMode" value="true" th:checked="${settings.maintenanceMode}">
-							メンテナンスモードを有効にする
-						</label>
-					</div>
-					<div class="form-group">
-						<label for="announcementMessage">全体お知らせメッセージ</label>
-						<textarea id="announcementMessage" name="announcementMessage" rows="3" th:text="${settings.announcementMessage}"></textarea>
-					</div>
-					<div class="form-group">
-						<label for="backupFrequency">自動バックアップ頻度</label>
-						<select id="backupFrequency" name="backupFrequency">
-							<option value="DAILY" th:selected="${settings.backupFrequency == 'DAILY'}">毎日</option>
-							<option value="WEEKLY" th:selected="${settings.backupFrequency == 'WEEKLY'}">毎週</option>
-							<option value="MONTHLY" th:selected="${settings.backupFrequency == 'MONTHLY'}">毎月</option>
-						</select>
-					</div>
-					<button type="submit" class="btn btn-primary">設定を保存</button>
-				</form>
+			<div class="settings-grid">
 
-				<div class="meta-item" style="margin-top:16px;">
-					<span class="meta-label">最終バックアップ日時</span>
-					<span th:text="${settings.lastBackupAt != null} ? ${#temporals.format(settings.lastBackupAt, 'yyyy-MM-dd HH:mm')} : '未実行'"></span>
+				<div class="panel">
+					<div class="panel-head">
+						<h2>アプリケーション設定</h2>
+					</div>
+					<form th:action="@{/admin/system/settings}" method="post" class="settings-form">
+						<div class="form-field form-field-checkbox">
+							<label class="checkbox-label">
+								<input type="checkbox" name="maintenanceMode" value="true" th:checked="${settings.maintenanceMode}">
+								<span>メンテナンスモードを有効にする</span>
+							</label>
+							<p class="field-hint">有効にすると、管理者以外はサービスを利用できなくなります。</p>
+						</div>
+						<div class="form-field">
+							<label for="announcementMessage">全体お知らせメッセージ</label>
+							<textarea id="announcementMessage" name="announcementMessage" rows="3" th:text="${settings.announcementMessage}" placeholder="全ユーザーに表示するお知らせを入力"></textarea>
+						</div>
+						<div class="form-field">
+							<label for="backupFrequency">自動バックアップ頻度</label>
+							<select id="backupFrequency" name="backupFrequency">
+								<option value="DAILY" th:selected="${settings.backupFrequency == 'DAILY'}">毎日</option>
+								<option value="WEEKLY" th:selected="${settings.backupFrequency == 'WEEKLY'}">毎週</option>
+								<option value="MONTHLY" th:selected="${settings.backupFrequency == 'MONTHLY'}">毎月</option>
+							</select>
+						</div>
+						<div class="form-actions">
+							<button type="submit" class="btn btn-primary">設定を保存</button>
+						</div>
+					</form>
 				</div>
-				<form th:action="@{/admin/system/backup}" method="post">
-					<button type="submit" class="btn btn-ghost">今すぐバックアップを実行</button>
-				</form>
+
+				<div class="panel">
+					<div class="panel-head">
+						<h2>バックアップ</h2>
+					</div>
+					<div class="backup-status">
+						<span class="meta-label">最終バックアップ日時</span>
+						<span class="backup-timestamp" th:text="${settings.lastBackupAt != null} ? ${#temporals.format(settings.lastBackupAt, 'yyyy-MM-dd HH:mm')} : '未実行'"></span>
+					</div>
+					<form th:action="@{/admin/system/backup}" method="post">
+						<button type="submit" class="btn btn-ghost">今すぐバックアップを実行</button>
+					</form>
+				</div>
+
 			</div>
 
 		</div>
